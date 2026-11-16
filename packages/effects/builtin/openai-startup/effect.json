@@ -1,20 +1,26 @@
 {
   "name": "OpenAI 启动画面",
-  "description": "暖白 OpenAI / Codex 开场，随后淡入当前聊天背景。每个窗口页面播放一次，可点跳过或按 Esc。",
-  "version": 1,
+  "description": "黑幕 OpenAI 标识、档案授权与环形核验，接龙娘背景的深色第二幕，再叠化回聊天。每个页面一次，支持跳过与 Esc。",
+  "version": 2,
   "hosts": ["codex"],
   "enabled": false,
   "order": 110,
   "params": {
     "duration": {
       "type": "number",
-      "default": 4,
-      "min": 2,
-      "max": 8,
-      "step": 0.5,
+      "default": 26,
+      "min": 12,
+      "max": 40,
+      "step": 1,
       "unit": "s",
-      "label": "停留时间",
-      "description": "开场停留秒数，随后用 450ms 淡入聊天界面"
+      "label": "播放时长",
+      "description": "自动播放约定秒数（不含等待确认和末尾 900ms 叠化）"
+    },
+    "requireInteraction": {
+      "type": "boolean",
+      "default": true,
+      "label": "等待确认",
+      "description": "访问许可和身份页等待点击或 Enter / 空格；关闭后全程自动播放"
     }
   }
 }

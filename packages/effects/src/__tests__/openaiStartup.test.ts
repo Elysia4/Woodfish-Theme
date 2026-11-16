@@ -3,14 +3,13 @@
 
 interface StartupContext {
   layer: HTMLElement;
-  params: { duration: number };
+  params: { duration: number; requireInteraction: boolean };
   simplified: () => boolean;
-  on: (target: EventTarget, type: string, listener: EventListener) => void;
+  on: (target: EventTarget, type: string, listener: EventListener, options?: boolean) => void;
   later: (ms: number, fn: () => void) => () => void;
 }
 
 type StartupFactory = (ctx: StartupContext) => { dispose?: () => void };
-
 let layer: HTMLElement;
 let context: StartupContext;
 let factory: StartupFactory;
@@ -25,11 +24,11 @@ beforeEach(() => {
   cleanups = [];
   context = {
     layer,
-    params: { duration: 4 },
+    params: { duration: 26, requireInteraction: true },
     simplified: () => false,
-    on: (target, type, listener) => {
-      target.addEventListener(type, listener);
-      cleanups.push(() => target.removeEventListener(type, listener));
+    on: (target, type, listener, options) => {
+      target.addEventListener(type, listener, options);
+      cleanups.push(() => target.removeEventListener(type, listener, options));
     },
     later: (ms, fn) => {
       const timer = setTimeout(fn, ms);
@@ -50,71 +49,150 @@ afterEach(() => {
 function overlay(): HTMLElement | null {
   return layer.querySelector('[data-woodfish-openai-startup]');
 }
+function action(): HTMLButtonElement | null {
+  return layer.querySelector('[data-startup-action]');
+}
+function key(key: string, repeat = false): KeyboardEvent {
+  const event = new KeyboardEvent('keydown', { key, repeat, cancelable: true, bubbles: true });
+  document.dispatchEvent(event);
+  return event;
+}
 
-describe('OpenAI startup', () => {
-  it('shows OpenAI and Codex, then removes the overlay after fading out', () => {
+describe('OpenAI startup reference sequence', () => {
+  it('starts with a black OpenAI mark and washes into the authorization plate', () => {
     factory(context);
-    expect(overlay()?.textContent).toContain('OpenAI');
-    expect(overlay()?.textContent).toContain('CODEX');
-    jest.advanceTimersByTime(4000);
-    expect(overlay()?.dataset.leaving).toBe('true');
-    jest.advanceTimersByTime(500);
+    expect(overlay()?.dataset.stage).toBe('boot');
+    expect(overlay()?.querySelector('svg')).not.toBeNull();
+    jest.advanceTimersByTime(2900);
+    expect(overlay()?.dataset.stage).toBe('permission');
+    expect(action()?.textContent).toContain('授予访问权限');
+  });
+
+  it('waits for each confirmation, then runs verification, welcome and the character scene', () => {
+    factory(context);
+    jest.advanceTimersByTime(7000);
+    expect(overlay()?.dataset.stage).toBe('permission');
+    action()?.click();
+    expect(overlay()?.dataset.stage).toBe('identity');
+    expect(overlay()?.textContent).toContain('Elysia');
+    jest.advanceTimersByTime(7000);
+    expect(overlay()?.dataset.stage).toBe('identity');
+    key('Enter');
+    expect(overlay()?.dataset.stage).toBe('request');
+    jest.advanceTimersByTime(1500);
+    expect(overlay()?.dataset.stage).toBe('read');
+    jest.advanceTimersByTime(2200);
+    expect(overlay()?.dataset.stage).toBe('verified');
+    jest.advanceTimersByTime(2800);
+    expect(overlay()?.dataset.stage).toBe('welcome');
+    jest.advanceTimersByTime(2600);
+    expect(overlay()?.dataset.stage).toBe('glitch');
+    jest.advanceTimersByTime(600);
+    expect(overlay()?.dataset.stage).toBe('cinema');
+    jest.advanceTimersByTime(10100);
     expect(overlay()).toBeNull();
   });
 
-  it('allows skipping immediately by button', () => {
+  it('can play automatically without confirmation and leaves no timers after fading', () => {
+    context.params.requireInteraction = false;
     factory(context);
-    layer.querySelector<HTMLButtonElement>('button')?.click();
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(28000);
+    expect(overlay()).toBeNull();
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it.each(['boot', 'permission', 'identity', 'cinema'])('can skip during %s', (stage) => {
+    factory(context);
+    if (stage !== 'boot') jest.advanceTimersByTime(2900);
+    if (stage === 'identity' || stage === 'cinema') action()?.click();
+    if (stage === 'cinema') {
+      action()?.click();
+      jest.advanceTimersByTime(9700);
+    }
+    expect(overlay()?.dataset.stage).toBe(stage);
+    layer.querySelector<HTMLButtonElement>('[data-startup-skip]')?.click();
+    jest.advanceTimersByTime(1000);
+    expect(overlay()).toBeNull();
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('handles Space, ignores repeated keys and consumes only the startup controls', () => {
+    factory(context);
+    jest.advanceTimersByTime(2900);
+    expect(key('a').defaultPrevented).toBe(false);
+    key('Enter', true);
+    expect(overlay()?.dataset.stage).toBe('permission');
+    expect(key(' ').defaultPrevented).toBe(true);
+    expect(overlay()?.dataset.stage).toBe('identity');
+    key(' ', true);
+    expect(overlay()?.dataset.stage).toBe('identity');
+    key('Escape');
+    key('Escape');
+    jest.advanceTimersByTime(1000);
     expect(overlay()).toBeNull();
   });
 
-  it('allows Escape to leave without intercepting normal typing', () => {
-    factory(context);
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }));
-    expect(overlay()?.dataset.leaving).toBeUndefined();
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-    jest.advanceTimersByTime(500);
-    expect(overlay()).toBeNull();
+  it('confines focus to the startup and restores the composer when disposed', () => {
+    const editor = document.createElement('textarea');
+    document.body.prepend(editor);
+    editor.focus();
+    const instance = factory(context);
+    expect(overlay()?.contains(document.activeElement)).toBe(true);
+    jest.advanceTimersByTime(2900);
+    expect(document.activeElement).toBe(action());
+    key('Tab');
+    expect(overlay()?.contains(document.activeElement)).toBe(true);
+    instance.dispose?.();
+    expect(document.activeElement).toBe(editor);
+    expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('does not cover the chat again on reinjection in the same page', () => {
-    const first = factory(context);
-    first.dispose?.();
+  it('does not restart on reinjection in the same page', () => {
+    factory(context).dispose?.();
     factory(context);
     expect(overlay()).toBeNull();
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('skips the startup when simplified motion is requested', () => {
+  it('skips when simplified motion is requested', () => {
     context.simplified = () => true;
     factory(context);
     expect(overlay()).toBeNull();
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('disposes immediately and cancels every pending timer', () => {
-    const instance = factory(context);
-    instance.dispose?.();
+  it('has a safety timeout even when a confirmation is never supplied', () => {
+    factory(context);
+    jest.advanceTimersByTime(121000);
     expect(overlay()).toBeNull();
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('safely handles repeated requests to leave', () => {
+  it('returns focus immediately while fading and no longer consumes typing', () => {
+    const editor = document.createElement('textarea');
+    document.body.prepend(editor);
+    editor.focus();
     factory(context);
-    const button = layer.querySelector<HTMLButtonElement>('button');
-    button?.click();
-    button?.click();
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(jest.getTimerCount()).toBe(1);
-    jest.advanceTimersByTime(500);
+    key('Escape');
+    expect(document.activeElement).toBe(editor);
+    expect(key(' ').defaultPrevented).toBe(false);
+    jest.advanceTimersByTime(1000);
     expect(overlay()).toBeNull();
   });
 
-  it('bounds an invalid duration so a bad setting cannot trap the chat', () => {
-    context.params.duration = Number.NaN;
+  it('leaves when the window switches to simplified motion during playback', () => {
     factory(context);
-    jest.advanceTimersByTime(4500);
+    context.simplified = () => true;
+    document.dispatchEvent(new Event('visibilitychange'));
+    jest.advanceTimersByTime(1000);
+    expect(overlay()).toBeNull();
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it.each([Number.NaN, -20, 200])('bounds an invalid duration %s', (duration) => {
+    context.params = { duration, requireInteraction: false };
+    factory(context);
+    jest.advanceTimersByTime(42000);
     expect(overlay()).toBeNull();
   });
 });

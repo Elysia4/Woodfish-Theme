@@ -1,179 +1,850 @@
+/* 技术档案版式参考 dsh-startup-screen (MIT, 沈宏宏)；许可见本目录 README.md。 */
+.woodfish-openai-startup,
+.woodfish-openai-startup *,
+.woodfish-openai-startup *::before,
+.woodfish-openai-startup *::after {
+  box-sizing: border-box;
+}
 .woodfish-openai-startup {
+  --wos-ink: #111210;
+  --wos-hair: #11121024;
+  --wos-mono: 'Cascadia Mono', Consolas, monospace;
+  --wos-din: Bahnschrift, 'Arial Narrow', 'Segoe UI', sans-serif;
   position: fixed;
   inset: 0;
+  z-index: 2147483000;
   overflow: hidden;
   isolation: isolate;
   pointer-events: auto;
-  color: #252723;
-  background: #f4f4ee;
-  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-  transition: opacity 450ms ease;
+  color: var(--wos-ink);
+  background: #020407;
+  font-family: var(--wos-din);
+  -webkit-app-region: no-drag;
+  -webkit-font-smoothing: antialiased;
+  transition: opacity 900ms ease;
+}
+.woodfish-openai-startup [hidden] {
+  display: none !important;
+}
+.woodfish-openai-startup p,
+.woodfish-openai-startup h1,
+.woodfish-openai-startup h2,
+.woodfish-openai-startup dl,
+.woodfish-openai-startup dd {
+  margin: 0;
+}
+.woodfish-openai-startup svg {
+  fill: currentColor;
+  width: 68px;
+  height: 68px;
+}
+.woodfish-openai-startup button {
+  font: inherit;
+  border-radius: 0;
+  cursor: pointer;
+  color: inherit;
   -webkit-app-region: no-drag;
 }
-
-.woodfish-openai-startup::before,
-.woodfish-openai-startup::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.woodfish-openai-startup::before {
-  background-image: var(--woodfish-background-image, none);
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 1000ms ease;
-}
-
-.woodfish-openai-startup::after {
-  background-image:
-    linear-gradient(#25272309 1px, transparent 1px),
-    linear-gradient(90deg, #25272309 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: linear-gradient(#000, transparent 40%, transparent 65%, #000);
-}
-
-.woodfish-openai-startup[data-stage='reveal']::before {
-  opacity: 0.52;
+.woodfish-openai-startup button:focus-visible {
+  outline: 2px solid #d87b2c;
+  outline-offset: 5px;
 }
 .woodfish-openai-startup[data-leaving='true'] {
   opacity: 0;
 }
-
-.woodfish-openai-startup-header,
-.woodfish-openai-startup-footer {
+.woodfish-openai-startup[data-leaving='true'] * {
+  pointer-events: none !important;
+}
+.wos-plate,
+.wos-boot,
+.wos-wash,
+.wos-cinema,
+.wos-panels,
+.wos-portrait,
+.wos-wire,
+.wos-scan {
   position: absolute;
-  left: clamp(24px, 5vw, 80px);
-  right: clamp(24px, 5vw, 80px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
+  inset: 0;
 }
-
-.woodfish-openai-startup-header {
-  top: clamp(28px, 6vh, 64px);
+.wos-plate {
+  z-index: 2;
+  background:
+    radial-gradient(ellipse at 80% 9%, #ffffffce, transparent 65%),
+    linear-gradient(165deg, #eeeee7, #deded7);
+  opacity: 1;
+  transition: opacity 700ms ease;
 }
-.woodfish-openai-startup-signature {
-  display: grid;
-  gap: 8px;
-}
-.woodfish-openai-startup-signature strong {
-  font-size: 28px;
-  letter-spacing: -1px;
-  font-weight: 600;
-}
-.woodfish-openai-startup-signature span,
-.woodfish-openai-startup-eyebrow,
-.woodfish-openai-startup-footer {
-  font:
-    10px/1.6 Consolas,
-    monospace;
-  letter-spacing: 2px;
-}
-
-.woodfish-openai-startup button {
-  color: inherit;
-  border: 1px solid #25272335;
-  border-radius: 0;
-  background: #f4f4ee99;
-  padding: 10px 16px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.woodfish-openai-startup button:hover {
-  background: #fff;
-  border-color: #252723;
-}
-.woodfish-openai-startup button:focus-visible {
-  outline: 2px solid #252723;
-  outline-offset: 5px;
-}
-.woodfish-openai-startup-skip {
-  font-size: 12px !important;
-}
-.woodfish-openai-startup-center {
-  position: absolute;
-  inset: 24% 20px 20%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.woodfish-openai-startup-title {
-  margin: 14px 0 0;
-  font-size: clamp(56px, 10vw, 120px);
-  line-height: 1.15;
-  letter-spacing: -0.065em;
-  font-weight: 500;
-}
-.woodfish-openai-startup-subtitle {
-  margin: 22px 0 30px;
-  font-size: clamp(13px, 1.6vw, 18px);
-  letter-spacing: 0.28em;
-}
-.woodfish-openai-startup-enter {
-  font-size: 12px !important;
-  letter-spacing: 3px;
-}
-.woodfish-openai-startup-eyebrow {
-  margin: 0;
-  opacity: 0.6;
-}
-
-.woodfish-openai-startup-orbit {
-  position: absolute;
-  z-index: -1;
-  width: min(60vw, 430px);
-  aspect-ratio: 1;
-  border: 1px solid #25272313;
-  border-radius: 50%;
-  outline: 1px dashed #25272325;
-  outline-offset: 18px;
-  animation: woodfish-openai-startup-orbit 24s linear infinite;
-}
-.woodfish-openai-startup-orbit::before,
-.woodfish-openai-startup-orbit::after {
+.wos-plate::after {
   content: '';
   position: absolute;
-  background: #25272350;
-  width: 16px;
-  height: 1px;
-  left: calc(50% - 8px);
+  inset: 20px;
+  pointer-events: none;
+  border: 1px solid #11121006;
+  background: linear-gradient(
+    90deg,
+    transparent 4%,
+    #ffffff35 4%,
+    transparent 4.2%,
+    transparent 78%,
+    #11121005 78%,
+    transparent 78.2%
+  );
 }
-.woodfish-openai-startup-orbit::before {
-  top: -19px;
+.wos-panel {
+  position: absolute;
+  top: 2%;
+  bottom: 3%;
+  width: 10%;
+  left: 5%;
+  background: linear-gradient(#ffffff48, #ffffff00);
+  border: 1px solid #ffffff32;
 }
-.woodfish-openai-startup-orbit::after {
-  bottom: -19px;
+.wos-panel:nth-child(2) {
+  left: 15%;
+  width: 45%;
 }
-.woodfish-openai-startup-footer {
-  bottom: clamp(28px, 6vh, 64px);
-  font-size: 9px;
+.wos-panel:nth-child(3) {
+  left: 60.5%;
+  width: 17%;
 }
-.woodfish-openai-startup-progress {
-  flex: 1;
-  max-width: 240px;
+.wos-panel:nth-child(4) {
+  left: 78%;
+  width: 17%;
+}
+.wos-brand,
+.wos-revision {
+  position: absolute;
+  left: 3.5%;
+  z-index: 3;
+}
+.wos-brand {
+  top: 5%;
+  display: flex;
+  flex-direction: column;
+}
+.wos-brand-name {
+  font-size: clamp(22px, 2.7vw, 35px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+.wos-brand-sub {
+  margin-top: 3px;
+  font-size: clamp(8px, 1vw, 13px);
+  font-weight: 600;
+}
+.wos-brand-os {
+  font-size: clamp(20px, 2.2vw, 30px);
+  line-height: 1.1;
+}
+.wos-revision {
+  top: 21%;
+  font: 9px var(--wos-mono);
+  letter-spacing: 0.12em;
+  color: #777970;
+}
+.wos-ticks {
+  display: flex;
+  gap: 5px;
+  margin-top: 14px;
+}
+.wos-tick {
+  width: 19px;
   height: 2px;
-  background: #25272315;
+  background: #11121020;
+  transition: background 300ms;
+}
+.wos-tick.wos-current {
+  background: #d88637;
+}
+.wos-center {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 47%;
+  transform: translateY(-50%);
+  z-index: 4;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.wos-status {
+  font:
+    400 clamp(22px, 2.7vw, 38px)/1.5 'Microsoft YaHei',
+    sans-serif;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  white-space: nowrap;
+}
+.wos-subtitle {
+  font: 11px/1.8 var(--wos-mono);
+  letter-spacing: 0.55em;
+  text-indent: 0.55em;
+  white-space: nowrap;
+}
+.wos-glyph {
+  display: inline-block;
+  text-indent: 0;
+  animation: wos-boot-in 320ms var(--wos-delay) ease both;
+}
+.wos-rule {
+  height: 1px;
+  width: min(43vw, 560px);
+  background: var(--wos-hair);
+}
+.wos-logo {
+  display: none;
+  align-items: center;
+  flex-direction: column;
+  gap: 13px;
+  margin-top: 18px;
+}
+.wos-logo svg {
+  width: 60px;
+  height: 60px;
+}
+.wos-logo-label {
+  font: 9px var(--wos-mono);
+  letter-spacing: 0.6em;
+}
+.wos-dots {
+  width: 80px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #11121080 0 3px, transparent 3px 10px);
+}
+.wos-action-area {
+  position: absolute;
+  top: 60%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.wos-action {
+  display: flex;
+  gap: 18px;
+  padding: 7px 18px;
+  background: transparent;
+  border: 1px solid #111210;
+  align-items: center;
+  transition:
+    background 200ms,
+    color 200ms;
+}
+.wos-action:hover {
+  color: #f4f3ec;
+  background: #111210;
+}
+.wos-action-zh {
+  font:
+    12px 'Microsoft YaHei',
+    sans-serif;
+  letter-spacing: 0.18em;
+}
+.wos-action-en {
+  font: 9px var(--wos-mono);
+  letter-spacing: 0.18em;
+  opacity: 0.65;
+}
+.wos-hint {
+  font:
+    9px 'Microsoft YaHei',
+    sans-serif;
+  color: #85867e;
+  letter-spacing: 0.1em;
+}
+.wos-card {
+  width: 270px;
+  padding: 2px 0;
+  border-block: 1px solid var(--wos-hair);
+}
+.wos-card-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 2px;
+  font:
+    11px 'Microsoft YaHei',
+    sans-serif;
+  letter-spacing: 0.1em;
+}
+.wos-card-key {
+  color: #85867e;
+}
+.wos-card-value {
+  font-weight: 600;
+}
+.wos-hex {
+  display: none;
+  position: absolute;
+  right: 3.5%;
+  top: 24%;
+  width: 200px;
+  height: 130px;
+  overflow: hidden;
+  color: #777970;
+  font: 9px/2 var(--wos-mono);
+  text-align: right;
+  mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+}
+.wos-idline {
+  position: absolute;
+  right: 3.5%;
+  bottom: 12.5%;
+  font: 10px var(--wos-mono);
+  letter-spacing: 0.17em;
+}
+.wos-footer {
+  position: absolute;
+  left: 3.5%;
+  right: 3.5%;
+  bottom: 5%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  z-index: 3;
+}
+.wos-badge,
+.wos-powered {
+  font: 9px var(--wos-mono);
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+}
+.wos-badge {
+  color: #81837b;
+}
+.wos-log {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: -1px;
+  text-align: center;
+}
+.wos-log-zh {
+  font:
+    12px/1.9 'Microsoft YaHei',
+    sans-serif;
+  color: #666960;
+}
+.wos-log-en {
+  font: 8px/2 var(--wos-mono);
+  color: #85867e;
+  letter-spacing: 0.25em;
+}
+.wos-progress {
+  position: absolute;
+  left: 33%;
+  right: 33%;
+  bottom: -26px;
+  height: 2px;
+  background: #1112100e;
   overflow: hidden;
 }
-.woodfish-openai-startup-progress span {
+.wos-progress-bar {
   display: block;
   height: 100%;
-  width: 100%;
-  background: #252723;
+  background: #111210;
   transform-origin: left;
-  animation: woodfish-openai-startup-progress var(--woodfish-openai-startup-runtime, 4000ms) linear
-    both;
+  transition: transform 700ms ease;
 }
-
-@keyframes woodfish-openai-startup-progress {
+.wos-reticle {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(53vw, 78vh);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+}
+.wos-reticle svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+}
+.wos-reticle circle {
+  fill: none;
+  stroke: #111210;
+  stroke-width: 4;
+}
+.wos-ring-outer,
+.wos-ring-middle,
+.wos-ring-inner {
+  transform-origin: 250px 250px;
+  animation: wos-spin 9s linear infinite;
+}
+.wos-reticle .wos-ring-middle circle {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.wos-ring-middle {
+  animation-duration: 5.4s;
+  animation-direction: reverse;
+}
+.wos-ring-inner {
+  animation-duration: 12s;
+}
+.wos-reticle .wos-ring-inner circle {
+  stroke-width: 1;
+}
+.wos-reticle .wos-ring-dot {
+  fill: #111210;
+  stroke: none;
+}
+.wos-reticle .wos-ring-middle .wos-ring-dot {
+  fill: white;
+}
+.wos-cross {
+  stroke: #d88637;
+  stroke-width: 1.4;
+}
+.wos-welcome {
+  display: none;
+  position: absolute;
+  inset: 38% 0 auto;
+  z-index: 5;
+  align-items: center;
+  flex-direction: column;
+}
+.wos-welcome-to {
+  font-size: clamp(24px, 3vw, 40px);
+  color: #2971a4;
+  letter-spacing: 0.15em;
+  text-shadow:
+    -1px 0 #ff493944,
+    1px 0 #07b5ee70;
+}
+.wos-welcome-box {
+  color: #f6f6ee;
+  background: #10110e;
+  font-size: clamp(17px, 1.9vw, 26px);
+  letter-spacing: 0.1em;
+  padding: 0 4px;
+}
+.wos-welcome svg {
+  width: 44px;
+  height: 44px;
+  margin-top: 15px;
+}
+.wos-welcome-sub {
+  margin-top: 20px;
+  font: 8px var(--wos-mono);
+  letter-spacing: 0.2em;
+  color: #6b7577;
+}
+.wos-boot {
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  background: #000;
+  color: white;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 650ms ease;
+}
+.wos-boot-inner {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.wos-boot-inner svg {
+  width: 64px;
+  height: 64px;
+}
+.wos-boot-name {
+  font:
+    600 32px 'Segoe UI',
+    sans-serif;
+  letter-spacing: -0.03em;
+}
+.wos-boot-sub {
+  font: 7px var(--wos-mono);
+  letter-spacing: 0.3em;
+  opacity: 0.5;
+}
+.wos-boot-sweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 40%, #ffffff12 49%, transparent 58%);
+  animation: wos-sweep calc(2400ms * var(--wos-scale)) ease both;
+}
+.wos-wash {
+  z-index: 7;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+.wos-skip {
+  position: absolute;
+  z-index: 9;
+  top: 42px;
+  right: 3.5%;
+  padding: 6px;
+  background: transparent;
+  border: 0;
+  font: 9px var(--wos-mono) !important;
+  letter-spacing: 0.2em;
+  opacity: 0.65;
+}
+.wos-skip:hover {
+  opacity: 1;
+}
+.woodfish-openai-startup[data-stage='boot'] .wos-boot {
+  opacity: 1;
+}
+.woodfish-openai-startup[data-stage='boot'] .wos-boot-inner {
+  animation: wos-boot-in 900ms ease both;
+}
+.woodfish-openai-startup[data-stage='boot'] .wos-skip,
+.woodfish-openai-startup[data-stage='cinema'] .wos-skip {
+  color: #dce8f2;
+}
+.woodfish-openai-startup[data-stage='wash'] .wos-wash {
+  animation: wos-wash calc(700ms * var(--wos-scale)) ease both;
+}
+.woodfish-openai-startup:is([data-stage='boot'], [data-stage='wash']) .wos-center {
+  opacity: 0;
+}
+.woodfish-openai-startup:is([data-stage='request'], [data-stage='read']) .wos-logo {
+  display: flex;
+}
+.woodfish-openai-startup[data-stage='read'] .wos-hex {
+  display: block;
+}
+.woodfish-openai-startup[data-stage='verified'] .wos-reticle {
+  display: block;
+  animation: wos-fade 500ms ease both;
+}
+.woodfish-openai-startup[data-stage='verified'] .wos-center {
+  top: 46%;
+}
+.woodfish-openai-startup[data-stage='verified'] .wos-status {
+  font-size: clamp(18px, 2.2vw, 30px);
+}
+.woodfish-openai-startup[data-stage='verified'] .wos-subtitle {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+}
+.woodfish-openai-startup[data-stage='verified'] .wos-rule {
+  display: none;
+}
+.woodfish-openai-startup:is([data-stage='welcome'], [data-stage='glitch']) .wos-center {
+  display: none;
+}
+.woodfish-openai-startup:is([data-stage='welcome'], [data-stage='glitch']) .wos-welcome {
+  display: flex;
+  animation: wos-fade 400ms ease both;
+}
+.woodfish-openai-startup[data-stage='glitch'] .wos-plate {
+  animation: wos-glitch calc(600ms * var(--wos-scale)) steps(1) both;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-plate {
+  opacity: 0;
+  pointer-events: none;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-plate * {
+  pointer-events: none;
+}
+/* 第二幕：右侧角色显影，左侧金属大字；图片保持原图，无逐帧绘图。 */
+.wos-cinema {
+  color: #cbdce7;
+  background: #020407;
+  overflow: hidden;
+}
+.wos-portrait {
+  left: 26%;
+  background-image: var(--woodfish-background-image, none);
+  background-size: cover;
+  background-position: 64% 35%;
+  mask-image: linear-gradient(90deg, transparent, #000 32%);
+  opacity: 0;
+  filter: saturate(0.65) brightness(0.6) contrast(1.2);
+}
+.wos-wire {
+  left: 26%;
+  background: var(--woodfish-background-image, none) 64% 35% / cover;
+  filter: grayscale(1) invert(1) contrast(3);
+  mix-blend-mode: screen;
+  mask-image: repeating-linear-gradient(0deg, transparent 0 3px, #000 3px 4px);
+  opacity: 0;
+}
+.wos-cinema::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #020407 0%, #020407c9 20%, transparent 62%),
+    linear-gradient(0deg, #02040790, transparent 25%, transparent 80%, #02040745);
+  pointer-events: none;
+}
+.wos-scan {
+  inset: -15% 0 auto;
+  height: 15%;
+  background: linear-gradient(transparent, #70cfff22, #9ceaff70 98%, transparent);
+  opacity: 0;
+}
+.wos-hud-top,
+.wos-hud-right,
+.wos-hud-bottom,
+.wos-hero,
+.wos-enter {
+  position: absolute;
+  z-index: 2;
+}
+.wos-hud-top {
+  top: 6%;
+  left: 3.5%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.wos-hud-name {
+  font: 16px var(--wos-din);
+}
+.wos-hud-caption,
+.wos-hud-right,
+.wos-hud-bottom {
+  font: 8px/1.8 var(--wos-mono);
+  letter-spacing: 0.2em;
+  white-space: pre-line;
+}
+.wos-hud-right {
+  top: 14%;
+  right: 3.5%;
+  text-align: right;
+  opacity: 0.55;
+}
+.wos-hud-bottom {
+  bottom: 7%;
+  left: 3.5%;
+  opacity: 0.7;
+}
+.wos-hero {
+  left: 3.5%;
+  top: 39%;
+  width: 49%;
+}
+.wos-hero-eyebrow {
+  font: 8px var(--wos-mono);
+  letter-spacing: 0.3em;
+  opacity: 0.45;
+  margin-bottom: 12px !important;
+}
+.wos-hero-title {
+  position: relative;
+  width: fit-content;
+  font:
+    italic 750 clamp(70px, 13.5vw, 190px)/1 'Segoe UI',
+    sans-serif;
+  letter-spacing: -0.07em;
+  color: transparent;
+  background: linear-gradient(
+    165deg,
+    #fcffff 8%,
+    #c6d8ea 25%,
+    #3f5268 44%,
+    #effaff 48%,
+    #88a2b9 57%,
+    #26384c 70%,
+    #b9d9eb 90%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-stroke: 0.65px #c5e6f399;
+  filter: drop-shadow(0 3px 2px #000) drop-shadow(0 0 10px #78c7ff25);
+}
+.wos-hero-title::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 2px 0 0 1px;
+  z-index: -1;
+  color: transparent;
+  -webkit-text-stroke: 1px #819fbf40;
+}
+.wos-hero-zh {
+  margin-top: 24px !important;
+  text-align: center;
+  font:
+    600 clamp(12px, 1.45vw, 20px) 'Microsoft YaHei',
+    sans-serif;
+  letter-spacing: 0.3em;
+  color: #b6d4e7;
+  text-shadow: 0 0 8px #5cbbff80;
+}
+.wos-hero-en {
+  margin-top: 12px !important;
+  text-align: center;
+  font: 8px var(--wos-mono);
+  letter-spacing: 0.6em;
+  opacity: 0.6;
+}
+.wos-terminal {
+  margin-top: 45px !important;
+  font: 10px var(--wos-mono);
+  color: #58d5b1;
+  opacity: 0.65;
+}
+.wos-enter {
+  right: 3.5%;
+  bottom: 6%;
+  border: 1px solid #9ddaff50;
+  background: #02040790;
+  padding: 9px 16px;
+  font-size: 11px !important;
+  letter-spacing: 0.15em;
+}
+.wos-enter:hover {
+  background: #24394e;
+}
+.wos-cinema-progress {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #b7e9fa80;
+  transform-origin: left;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-portrait {
+  animation: wos-portrait var(--wos-scene-duration) ease-out both;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-wire {
+  animation: wos-wire calc(2400ms * var(--wos-scale)) ease-out both;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-scan {
+  animation: wos-scan calc(3200ms * var(--wos-scale)) linear both;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-hero {
+  animation: wos-hero calc(2800ms * var(--wos-scale)) ease both;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-cinema-progress {
+  animation: wos-progress var(--wos-scene-duration) linear both;
+}
+@keyframes wos-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes wos-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wos-boot-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes wos-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes wos-wash {
+  0% {
+    opacity: 0;
+    background: #666;
+  }
+  45% {
+    opacity: 1;
+    background: #fff;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes wos-glitch {
+  0%,
+  25%,
+  65% {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+  12%,
+  50% {
+    transform: translateX(-5px);
+    filter: drop-shadow(6px 0 #33dbff) drop-shadow(-6px 0 #ff4433);
+  }
+  35%,
+  75% {
+    transform: translateX(4px);
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes wos-portrait {
+  0% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1) translateX(-1%);
+  }
+}
+@keyframes wos-wire {
+  0% {
+    opacity: 0.6;
+    clip-path: inset(0 0 100% 0);
+  }
+  35% {
+    opacity: 0.65;
+    clip-path: inset(0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0);
+  }
+}
+@keyframes wos-scan {
+  from {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(800%);
+  }
+}
+@keyframes wos-hero {
+  0%,
+  25% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  65% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes wos-progress {
   from {
     transform: scaleX(0);
   }
@@ -181,12 +852,6 @@
     transform: scaleX(1);
   }
 }
-@keyframes woodfish-openai-startup-orbit {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 :root[data-woodfish-paused] .woodfish-openai-startup * {
   animation-play-state: paused !important;
 }
@@ -199,13 +864,107 @@
     transition: none !important;
   }
 }
-@media (max-width: 600px) {
-  .woodfish-openai-startup-footer {
-    gap: 14px;
-    font-size: 8px;
-    letter-spacing: 1px;
+@media (max-width: 650px) {
+  .wos-skip {
+    top: 35px;
   }
-  .woodfish-openai-startup-footer > span:first-child {
-    display: none;
+  .wos-brand-sub {
+    font-size: 7px;
+  }
+  .wos-revision {
+    font-size: 7px;
+  }
+  .wos-status {
+    font-size: 22px;
+  }
+  .wos-subtitle {
+    font-size: 8px;
+    letter-spacing: 0.16em;
+  }
+  .wos-action {
+    gap: 10px;
+  }
+  .wos-card {
+    width: 240px;
+  }
+  .wos-idline,
+  .wos-hex {
+    display: none !important;
+  }
+  .wos-log {
+    left: 0;
+    right: 0;
+    bottom: 25px;
+  }
+  .wos-log-zh {
+    font-size: 10px;
+  }
+  .wos-log-en {
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+  .wos-badge,
+  .wos-powered {
+    font-size: 7px;
+    letter-spacing: 0;
+  }
+  .wos-reticle {
+    width: min(85vw, 65vh);
+  }
+  .wos-hero {
+    width: 90%;
+    top: 45%;
+  }
+  .wos-hero-title {
+    font-size: clamp(70px, 18vw, 112px);
+  }
+  .wos-hero-zh,
+  .wos-hero-en {
+    text-align: left;
+  }
+  .wos-hero-en {
+    letter-spacing: 0.3em;
+  }
+  .wos-portrait,
+  .wos-wire {
+    left: 0;
+  }
+  .wos-cinema::after {
+    background:
+      linear-gradient(90deg, #020407ce, #02040730), linear-gradient(0deg, #020407, transparent 70%);
+  }
+}
+@media (max-height: 560px) {
+  .wos-brand {
+    top: 4%;
+  }
+  .wos-brand-name {
+    font-size: 20px;
+  }
+  .wos-brand-sub {
+    font-size: 8px;
+  }
+  .wos-brand-os {
+    font-size: 18px;
+  }
+  .wos-revision {
+    top: 25%;
+  }
+  .wos-card-row {
+    padding: 2px;
+    font-size: 10px;
+  }
+  .wos-action-area {
+    gap: 7px;
+  }
+  .wos-hint {
+    font-size: 8px;
+  }
+  .wos-logo svg {
+    width: 38px;
+    height: 38px;
+  }
+  .wos-logo {
+    gap: 6px;
   }
 }

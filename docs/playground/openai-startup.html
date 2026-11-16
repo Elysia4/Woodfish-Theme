@@ -15,6 +15,7 @@
       }
       body {
         margin: 0;
+        overflow: hidden;
         min-height: 100vh;
         color: #f5f3ff;
         font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
@@ -52,19 +53,27 @@
       nav {
         position: fixed;
         right: 24px;
-        bottom: 24px;
-        z-index: 2;
+        bottom: 12px;
+        z-index: 2147483100;
         display: flex;
         gap: 12px;
+        opacity: 0.35;
+      }
+      nav:hover,
+      nav:focus-within {
+        opacity: 1;
       }
       nav button,
-      nav label {
-        padding: 10px 16px;
+      nav label,
+      nav select {
+        padding: 6px 10px;
         border: 1px solid #ffffff40;
         background: #24252c;
         color: #fff;
-        border-radius: 12px;
-        font: inherit;
+        border-radius: 2px;
+        font:
+          11px 'Segoe UI',
+          sans-serif;
         cursor: pointer;
       }
       #layer {
@@ -86,6 +95,16 @@
     </main>
     <nav aria-label="预览控制">
       <button id="replay" type="button">重播启动画面</button>
+      <select id="stage" aria-label="定位预览阶段">
+        <option value="">完整播放</option>
+        <option value="boot">黑幕标识</option>
+        <option value="permission">访问许可</option>
+        <option value="identity">身份确认</option>
+        <option value="read">读取权限</option>
+        <option value="verified">环形核验</option>
+        <option value="welcome">欢迎页</option>
+        <option value="cinema">角色第二幕</option>
+      </select>
       <label
         >换预览图片<input id="picture" type="file" accept="image/jpeg,image/png,image/webp" hidden
       /></label>
@@ -100,28 +119,76 @@
       let cleanups = [];
       let instance;
       let pictureUrl;
+      let clock = 0;
+      let jobs = [];
+      let paused = false;
+      let lastTick = performance.now();
+      // 只在预览里使用可推进的虚拟时钟，生产插件仍使用 ctx.later。
+      function advance(to) {
+        while (true) {
+          jobs.sort((a, b) => a.at - b.at);
+          const job = jobs[0];
+          if (!job || job.at > to) break;
+          jobs.shift();
+          clock = job.at;
+          job.fn();
+        }
+        clock = to;
+      }
+      setInterval(() => {
+        const now = performance.now();
+        if (!paused) advance(clock + now - lastTick);
+        lastTick = now;
+      }, 50);
       function replay() {
         instance?.dispose?.();
         cleanups.forEach((fn) => fn());
         cleanups = [];
+        jobs = [];
+        clock = 0;
+        paused = false;
+        lastTick = performance.now();
         delete document.documentElement.dataset.woodfishOpenaiStartupSeen;
         instance = module.exports({
           layer,
-          params: { duration: 4 },
+          params: { duration: 26, requireInteraction: true },
           simplified: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
-          on(target, type, listener) {
-            target.addEventListener(type, listener);
-            cleanups.push(() => target.removeEventListener(type, listener));
+          on(target, type, listener, options) {
+            const wrapped = (event) => {
+              if (type === 'click' || type === 'keydown') paused = false;
+              listener(event);
+            };
+            target.addEventListener(type, wrapped, options);
+            cleanups.push(() => target.removeEventListener(type, wrapped, options));
           },
           later(ms, fn) {
-            const id = setTimeout(fn, ms);
-            const cancel = () => clearTimeout(id);
+            const job = { at: clock + ms, fn };
+            jobs.push(job);
+            const cancel = () => {
+              jobs = jobs.filter((candidate) => candidate !== job);
+            };
             cleanups.push(cancel);
             return cancel;
           },
         });
       }
       document.querySelector('#replay').addEventListener('click', replay);
+      document.querySelector('#stage').addEventListener('change', (event) => {
+        const target = event.target.value;
+        replay();
+        if (!target) return;
+        for (let i = 0; i < 20; i++) {
+          const screen = layer.querySelector('[data-woodfish-openai-startup]');
+          if (!screen || screen.dataset.stage === target) break;
+          if (screen.dataset.stage === 'permission' || screen.dataset.stage === 'identity') {
+            layer.querySelector('[data-startup-action]').click();
+          } else {
+            const next = Math.min(...jobs.map((job) => job.at));
+            advance(next);
+          }
+        }
+        paused = true;
+      });
       document.querySelector('#picture').addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;

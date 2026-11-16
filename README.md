@@ -416,11 +416,13 @@ code --install-extension woodfish-theme-7.2.0.vsix
 
 ### 本地定制：OpenAI 启动画面
 
-新增可选的 `openai-startup` 效果：暖白 OpenAI / Codex 开场、环形刻度和当前背景的渐入，默认停留 4 秒，再用 450ms 淡入聊天。设置 → 外观 → Woodfish 中开启「OpenAI 启动画面」，点「跳过」「进入工作区」或按 Esc 可提前结束。每个窗口页面只播放一次，调整效果不会反复挡住聊天；减少动态或在后台首次加载时跳过。
+可选的 `openai-startup` v2 效果按参考演示播放完整两幕：黑幕 OpenAI 标识 → 洗白 → 技术档案页的访问许可与身份确认 → 请求与读取 → 环形核验 → 欢迎页 → 色散揭幕 → 右侧角色、左侧金属 OpenAI 大字和 HUD → 900ms 叠化回聊天。设置 → 外观 → Woodfish 中开启「OpenAI 启动画面」，默认时长约 26 秒（等待确认另计），可调 12–40 秒；「等待确认」开启时，前两步点击按钮或按 Enter / 空格继续，关闭后自动播放。右上角跳过和 Esc 全程可用，第二幕也可点「进入工作区」。
 
-这是窗口页面加载后的效果，不替换 Codex 原生的启动窗口。背景继续使用现有静态图片功能：`woodfish codex background set <图片路径>`，或者在外观设置里上传 JPG / PNG / WebP。图片保存在本机，个人素材和设置备份放在被 Git 忽略的 `local/` 下；目前不支持视频背景。
+每个窗口页面只播放一次，调整效果不会反复挡住聊天；减少动态或在后台首次加载时跳过。离开时归还输入焦点，卸载清理计时器；等待确认超过两分钟会自动退场。许可和身份信息是演出文案，不读取真实账户、不申请系统权限。身份名称当前为本地定制的 `Elysia`。
 
-预览使用实际插件代码：[OpenAI 启动画面预览](./docs/playground/openai-startup.html)，需从仓库根目录启动静态 HTTP 服务后打开。效果说明与时长参数见 [openai-startup](./packages/effects/builtin/openai-startup/README.md)。
+这是窗口页面加载后的效果，不替换 Codex 原生的启动窗口。第二幕共享聊天背景，通过静态图显影、扫描和缓慢推近营造动效；不包含参考视频中的角色动作和原声。背景继续使用现有静态图片功能：`woodfish codex background set <图片路径>`，或者在外观设置里上传 JPG / PNG / WebP。图片保存在本机，个人素材和设置备份放在被 Git 忽略的 `local/` 下；目前不支持视频背景。
+
+预览使用实际插件代码：[OpenAI 启动画面预览](./docs/playground/openai-startup.html)，需从仓库根目录启动静态 HTTP 服务后打开。预览下方可重播、选择图片或定位单个阶段；定位只暂停预览时钟，完整播放仍保留两个确认步骤。效果说明、参数和来源许可见 [openai-startup](./packages/effects/builtin/openai-startup/README.md)。
 
 已有 Windows Woodfish 安装时，可在仓库根目录运行 `./scripts/apply-openai-look.ps1 -ImagePath '本机图片路径'`。脚本先把相关旧设置备份到 `local/openai-dragon/backup-*`，再通过已安装 CLI 保存图片，开启启动插件，并将背景透出、面板遮罩和模糊设为 22%、65%、14px；只刷新效果，不重启 Codex。未指定路径时读取 `local/openai-dragon/background.png`。以后换静态图直接运行 `woodfish codex background set <新图片路径>` 即可。
 

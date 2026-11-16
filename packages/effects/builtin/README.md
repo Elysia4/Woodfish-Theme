@@ -214,6 +214,7 @@
 
 | 变量 | 作用 | 默认值 | 示例 |
 | --- | --- | --- | --- |
-| `--woodfish-openai-startup-duration` | 停留时间：开场停留秒数，随后用 450ms 淡入聊天界面。范围 2–8s | `4s` | `--woodfish-openai-startup-duration: 5.5s;` |
+| `--woodfish-openai-startup-duration` | 播放时长：自动播放约定秒数（不含等待确认和末尾 900ms 叠化）。范围 12–40s | `26s` | `--woodfish-openai-startup-duration: 33s;` |
+| `--woodfish-openai-startup-require-interaction` | 等待确认：访问许可和身份页等待点击或 Enter / 空格；关闭后全程自动播放。1 开，0 关 | `1` | `--woodfish-openai-startup-require-interaction: 0;` |
 
 <!-- 参数变量清单结束 -->

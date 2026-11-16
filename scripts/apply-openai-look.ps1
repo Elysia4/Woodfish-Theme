@@ -60,7 +60,7 @@ New-Item -ItemType Directory -Path $pluginTarget -Force | Out-Null
 foreach ($file in @('effect.js', 'effect.css', 'effect.json', 'README.md')) {
     Copy-Item -LiteralPath (Join-Path $pluginSource $file) -Destination (Join-Path $pluginTarget $file) -Force
 }
-$startupValues = @{ enabled = $true; duration = 4 }
+$startupValues = @{ enabled = $true; duration = 26; requireInteraction = $true }
 [IO.File]::WriteAllText((Join-Path $pluginTarget 'params.json'), ($startupValues | ConvertTo-Json), $utf8)
 
 & node $installedCli reload
