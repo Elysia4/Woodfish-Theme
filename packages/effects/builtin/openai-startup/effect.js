@@ -21,6 +21,8 @@ module.exports = function openaiStartup(ctx) {
   let stageIndex = -1;
   let leaving = false;
   let removed = false;
+  let entering = false;
+  let previousEntrance;
 
   const stages = [
     ['boot', 2200],
@@ -325,27 +327,42 @@ module.exports = function openaiStartup(ctx) {
     if (removed) return;
     removed = true;
     cancelPending();
+    if (entering) {
+      if (previousEntrance === null) root.removeAttribute('data-woodfish-startup-enter');
+      else root.setAttribute('data-woodfish-startup-enter', previousEntrance);
+      entering = false;
+    }
     const restore = screen.contains(document.activeElement);
     screen.remove();
     if (restore && previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }
-  function leave() {
+  function leave(animate = false) {
+    if (ctx.simplified()) {
+      remove();
+      return;
+    }
     if (leaving || removed) return;
     leaving = true;
     cancelPending();
+    entering = animate === true && screen.dataset.stage === 'cinema';
+    if (entering) {
+      previousEntrance = root.getAttribute('data-woodfish-startup-enter');
+      root.dataset.woodfishStartupEnter = 'true';
+      screen.dataset.chatEntrance = 'true';
+    }
     screen.dataset.leaving = 'true';
     screen.style.pointerEvents = 'none';
     // 淡出时立即归还键盘焦点，避免透明按钮继续截获输入。
     if (screen.contains(document.activeElement) && previousFocus?.isConnected)
       previousFocus.focus({ preventScroll: true });
-    later(900, remove);
+    later(entering ? 1800 : 900, remove);
   }
   function next() {
     if (leaving || removed) return;
     pendingStep?.();
     stageIndex += 1;
     if (stageIndex >= stages.length) {
-      leave();
+      leave(true);
       return;
     }
     const [stage, ms, zh, en, message, messageEn] = stages[stageIndex];
@@ -371,7 +388,8 @@ module.exports = function openaiStartup(ctx) {
     enter.hidden = stage !== 'cinema';
     actionZh.textContent = stage === 'permission' ? '授予访问权限' : '确认身份';
     actionEn.textContent = stage === 'permission' ? 'GRANT ACCESS' : 'CONFIRM IDENTITY';
-    if (waiting && interactive) action.focus({ preventScroll: true });
+    if (stage === 'cinema') enter.focus({ preventScroll: true });
+    else if (waiting && interactive) action.focus({ preventScroll: true });
     else if (screen.contains(document.activeElement) && document.activeElement !== skip)
       skip.focus({ preventScroll: true });
     if (!waiting || !interactive) pendingStep = later(ms * scale, next);
@@ -380,15 +398,15 @@ module.exports = function openaiStartup(ctx) {
     if (screen.dataset.stage === 'permission' || screen.dataset.stage === 'identity') next();
   }
   ctx.on(skip, 'click', leave);
-  ctx.on(enter, 'click', leave);
+  ctx.on(enter, 'click', () => leave(true));
   ctx.on(action, 'click', confirm);
   ctx.on(document, 'visibilitychange', () => {
-    if (ctx.simplified()) leave();
+    if (ctx.simplified()) remove();
   });
   if (typeof window.matchMedia === 'function') {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     ctx.on(motion, 'change', () => {
-      if (motion.matches) leave();
+      if (motion.matches) remove();
     });
   }
   ctx.on(
@@ -404,7 +422,7 @@ module.exports = function openaiStartup(ctx) {
         event.preventDefault();
         event.stopPropagation();
         if (document.activeElement === skip) leave();
-        else if (screen.dataset.stage === 'cinema') leave();
+        else if (screen.dataset.stage === 'cinema') leave(true);
         else confirm();
       } else if (event.key === 'Tab') {
         event.preventDefault();

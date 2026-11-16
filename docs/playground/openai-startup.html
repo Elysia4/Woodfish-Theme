@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OpenAI / Codex 启动画面预览</title>
-    <link rel="stylesheet" href="../../packages/effects/builtin/openai-startup/effect.css?v=4" />
+    <link rel="stylesheet" href="../../packages/effects/builtin/openai-startup/effect.css?v=5" />
     <style>
       :root {
         --woodfish-background-image: url('/local/openai-dragon/background.png');
@@ -30,10 +30,37 @@
         background-position: center;
         background-size: cover;
       }
+      .workspace {
+        display: grid;
+        grid-template-columns: 200px minmax(0, 1fr);
+        height: 100vh;
+      }
+      aside {
+        padding: 36px 20px;
+        background: #14151ba8;
+        border-right: 1px solid #ffffff20;
+      }
+      aside p {
+        padding: 14px 0;
+        border-bottom: 1px solid #ffffff18;
+        font-size: 13px;
+      }
       main {
-        max-width: 800px;
-        margin: 15vh auto;
-        padding: 32px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 32px clamp(24px, 5vw, 80px) 100px;
+      }
+      header {
+        padding-bottom: 24px;
+        border-bottom: 1px solid #ffffff25;
+        font-size: 13px;
+        letter-spacing: 2px;
+      }
+      [data-app-action-timeline-scroll] {
+        flex: 1;
+        padding-top: 36px;
+        overflow: auto;
       }
       main h1 {
         font-size: clamp(36px, 6vw, 64px);
@@ -44,8 +71,10 @@
         line-height: 1.8;
       }
       .composer {
-        margin-top: 70px;
-        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 24px;
         background: #24252cdd;
         border: 1px solid #ffffff30;
         border-radius: 24px;
@@ -91,17 +120,57 @@
         pointer-events: none;
         z-index: 1;
       }
+      .composer textarea {
+        flex: 1;
+        min-width: 0;
+        resize: none;
+        background: transparent;
+        border: 0;
+        color: inherit;
+        font: inherit;
+      }
+      .composer button {
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 50%;
+        background: #ece9ff;
+        color: #222;
+      }
+      @media (max-width: 600px) {
+        .workspace {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        aside {
+          display: none;
+        }
+        main h1 {
+          letter-spacing: 0;
+        }
+      }
     </style>
   </head>
   <body>
-    <main>
-      <p>OPENAI / CODEX</p>
-      <h1>让想法，从这里开始。</h1>
-      <p>
-        这是启动效果的独立预览。开场淡出后会回到聊天窗口；实际背景由 Codex 中的 Woodfish 设置控制。
-      </p>
-      <div class="composer">你想一起做些什么？</div>
-    </main>
+    <div class="workspace">
+      <aside data-sidebar-navigation-root>
+        <strong>CODEX</strong>
+        <p>＋ 新建对话</p>
+        <p>最近的对话</p>
+        <p>让想法，从这里开始</p>
+      </aside>
+      <main data-app-shell-main-surface>
+        <header>OPENAI / CODEX</header>
+        <section data-app-action-timeline-scroll>
+          <h1>让想法，从这里开始。</h1>
+          <p>开场结束后，侧栏、对话区和输入框依次展开，约 1.8 秒完成。</p>
+          <p>预览使用实际插件，背景由 Codex 中的 Woodfish 设置控制。</p>
+        </section>
+        <div class="composer" data-codex-composer-root>
+          <textarea aria-label="消息输入框" placeholder="你想一起做些什么？"></textarea>
+          <button type="button" aria-label="发送消息预览">↑</button>
+        </div>
+      </main>
+    </div>
     <nav aria-label="预览控制">
       <input id="name" type="text" maxlength="48" value="访客" aria-label="展示名称" />
       <button id="replay" type="button">重播启动画面</button>
@@ -114,6 +183,7 @@
         <option value="verified">环形核验</option>
         <option value="welcome">欢迎页</option>
         <option value="cinema">角色第二幕</option>
+        <option value="chat">进入聊天（1.8 秒）</option>
       </select>
       <label
         >换预览图片<input id="picture" type="file" accept="image/jpeg,image/png,image/webp" hidden
@@ -189,7 +259,8 @@
       document.querySelector('#replay').addEventListener('click', replay);
       document.querySelector('#name').addEventListener('change', replay);
       document.querySelector('#stage').addEventListener('change', (event) => {
-        const target = event.target.value;
+        const entrance = event.target.value === 'chat';
+        const target = entrance ? 'cinema' : event.target.value;
         replay();
         if (!target) return;
         for (let i = 0; i < 20; i++) {
@@ -202,7 +273,8 @@
             advance(next);
           }
         }
-        paused = true;
+        if (entrance) layer.querySelector('.wos-enter').click();
+        else paused = true;
       });
       document.querySelector('#picture').addEventListener('change', (event) => {
         const file = event.target.files[0];

@@ -18,6 +18,7 @@ let cleanups: Array<() => void>;
 beforeEach(() => {
   jest.useFakeTimers();
   delete document.documentElement.dataset.woodfishOpenaiStartupSeen;
+  delete document.documentElement.dataset.woodfishStartupEnter;
   document.body.replaceChildren();
   layer = document.createElement('div');
   document.body.append(layer);
@@ -107,7 +108,7 @@ describe('OpenAI startup reference sequence', () => {
     expect(overlay()?.dataset.stage).toBe('glitch');
     jest.advanceTimersByTime(600);
     expect(overlay()?.dataset.stage).toBe('cinema');
-    jest.advanceTimersByTime(10100);
+    jest.advanceTimersByTime(11000);
     expect(overlay()).toBeNull();
   });
 
@@ -196,6 +197,57 @@ describe('OpenAI startup reference sequence', () => {
     expect(key(' ').defaultPrevented).toBe(false);
     jest.advanceTimersByTime(1000);
     expect(overlay()).toBeNull();
+  });
+
+  it.each(['click', 'Enter', ' '])('reveals the chat once when entering with %s', (input) => {
+    const editor = document.createElement('textarea');
+    document.body.prepend(editor);
+    editor.focus();
+    factory(context);
+    jest.advanceTimersByTime(2900);
+    action()?.click();
+    action()?.click();
+    jest.advanceTimersByTime(9700);
+    if (input === 'click') layer.querySelector<HTMLButtonElement>('.wos-enter')?.click();
+    else key(input);
+    expect(document.documentElement.dataset.woodfishStartupEnter).toBe('true');
+    expect(overlay()?.dataset.chatEntrance).toBe('true');
+    expect(document.activeElement).toBe(editor);
+    expect(key(' ').defaultPrevented).toBe(false);
+    jest.advanceTimersByTime(1799);
+    expect(document.documentElement.dataset.woodfishStartupEnter).toBe('true');
+    jest.advanceTimersByTime(1);
+    expect(overlay()).toBeNull();
+    expect(document.documentElement.hasAttribute('data-woodfish-startup-enter')).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('reveals the chat after automatic playback but not when skipped', () => {
+    context.params.requireInteraction = false;
+    const instance = factory(context);
+    jest.advanceTimersByTime(26000);
+    expect(document.documentElement.dataset.woodfishStartupEnter).toBe('true');
+    instance.dispose?.();
+    expect(document.documentElement.hasAttribute('data-woodfish-startup-enter')).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
+    delete document.documentElement.dataset.woodfishOpenaiStartupSeen;
+    factory(context);
+    key('Escape');
+    expect(document.documentElement.hasAttribute('data-woodfish-startup-enter')).toBe(false);
+    jest.advanceTimersByTime(1000);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('ends an active chat entrance immediately when motion becomes simplified', () => {
+    context.params.requireInteraction = false;
+    factory(context);
+    jest.advanceTimersByTime(26000);
+    expect(document.documentElement.dataset.woodfishStartupEnter).toBe('true');
+    context.simplified = () => true;
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(overlay()).toBeNull();
+    expect(document.documentElement.hasAttribute('data-woodfish-startup-enter')).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
   });
 
   it('leaves when the window switches to simplified motion during playback', () => {

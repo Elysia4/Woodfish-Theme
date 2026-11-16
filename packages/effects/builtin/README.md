@@ -215,7 +215,7 @@
 | 变量 | 作用 | 默认值 | 示例 |
 | --- | --- | --- | --- |
 | `params.json: displayName` | 展示名称：身份卡和欢迎语共用的名称，仅作为动画文案，不读取系统或账号名称。最多 48 字符；在设置或 params.json 修改，不映射 CSS | `"访客"` | `"displayName": "你的名字"` |
-| `--woodfish-openai-startup-duration` | 播放时长：自动播放约定秒数（不含等待确认和末尾 900ms 叠化）。范围 12–40s | `26s` | `--woodfish-openai-startup-duration: 33s;` |
+| `--woodfish-openai-startup-duration` | 播放时长：自动播放约定秒数（不含等待确认和末尾 1.8 秒聊天入场）。范围 12–40s | `26s` | `--woodfish-openai-startup-duration: 33s;` |
 | `--woodfish-openai-startup-require-interaction` | 等待确认：访问许可和身份页等待点击或 Enter / 空格；关闭后全程自动播放。1 开，0 关 | `1` | `--woodfish-openai-startup-require-interaction: 0;` |
 
 <!-- 参数变量清单结束 -->

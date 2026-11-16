@@ -1,7 +1,7 @@
 {
   "name": "OpenAI 启动画面",
-  "description": "黑幕 OpenAI 标识、档案授权与环形核验，接龙娘背景的深色第二幕，再叠化回聊天。每个页面一次，支持跳过与 Esc。",
-  "version": 4,
+  "description": "黑幕 OpenAI 标识、档案授权与环形核验，接深色第二幕，最后分层展开进入聊天。每个页面一次，支持跳过与 Esc。",
+  "version": 5,
   "hosts": ["codex"],
   "enabled": false,
   "order": 110,
@@ -21,7 +21,7 @@
       "step": 1,
       "unit": "s",
       "label": "播放时长",
-      "description": "自动播放约定秒数（不含等待确认和末尾 900ms 叠化）"
+      "description": "自动播放约定秒数（不含等待确认和末尾 1.8 秒聊天入场）"
     },
     "requireInteraction": {
       "type": "boolean",
