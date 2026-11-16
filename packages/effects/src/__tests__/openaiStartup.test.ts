@@ -3,7 +3,7 @@
 
 interface StartupContext {
   layer: HTMLElement;
-  params: { duration: number; requireInteraction: boolean };
+  params: { duration: number; requireInteraction: boolean; displayName?: string };
   simplified: () => boolean;
   on: (target: EventTarget, type: string, listener: EventListener, options?: boolean) => void;
   later: (ms: number, fn: () => void) => () => void;
@@ -24,7 +24,7 @@ beforeEach(() => {
   cleanups = [];
   context = {
     layer,
-    params: { duration: 26, requireInteraction: true },
+    params: { duration: 26, requireInteraction: true, displayName: 'Elysia' },
     simplified: () => false,
     on: (target, type, listener, options) => {
       target.addEventListener(type, listener, options);
@@ -59,6 +59,24 @@ function key(key: string, repeat = false): KeyboardEvent {
 }
 
 describe('OpenAI startup reference sequence', () => {
+  it('uses the configured name as text in both the identity card and welcome', () => {
+    context.params.displayName = '<b>龙娘</b>';
+    factory(context);
+    expect(layer.querySelector('.wos-card')?.textContent).toContain('<b>龙娘</b>');
+    expect(layer.querySelector('.wos-card b')).toBeNull();
+    jest.advanceTimersByTime(2900);
+    action()?.click();
+    action()?.click();
+    jest.advanceTimersByTime(6500);
+    expect(layer.querySelector('.wos-log-zh')?.textContent).toContain('<b>龙娘</b>');
+  });
+
+  it('uses a generic name when no name is configured', () => {
+    delete context.params.displayName;
+    factory(context);
+    expect(layer.querySelector('.wos-card')?.textContent).toContain('访客');
+    expect(layer.querySelector('.wos-card')?.textContent).not.toContain('Elysia');
+  });
   it('starts with a black OpenAI mark and washes into the authorization plate', () => {
     factory(context);
     expect(overlay()?.dataset.stage).toBe('boot');

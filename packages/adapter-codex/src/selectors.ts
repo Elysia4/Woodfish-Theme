@@ -15,6 +15,10 @@ export interface SelectorGroup {
   readonly description: string;
 }
 
+const COMPOSER_LAYOUT_SELECTORS = ['default', 'opaque'].map(
+  (variant) => `[data-codex-composer-root] [data-composer-surface-variant="${variant}"]`
+);
+
 export const CODEX_SELECTORS = {
   appShell: {
     selectors: ['[data-app-shell-main-surface]'],
@@ -138,13 +142,24 @@ export const CODEX_SELECTORS = {
     alwaysPresent: false,
     description: '输入框后方的底条',
   },
+  threadFooterContainer: {
+    selectors: ['[data-request-input-activity-root] :has(> [data-thread-scroll-footer])'],
+    alwaysPresent: false,
+    description: '新版输入区的底部渐隐与底条容器',
+  },
   composerLayout: {
-    selectors: [
-      '[data-codex-composer-root] [data-composer-surface-variant="default"]',
-      '[data-codex-composer-root] [data-composer-surface-variant="opaque"]',
-    ],
+    selectors: COMPOSER_LAYOUT_SELECTORS,
     alwaysPresent: false,
     description: '输入框底板',
+  },
+  composerPanel: {
+    // An overflowing layout is square; its direct body carries the rounded surface.
+    selectors: COMPOSER_LAYOUT_SELECTORS.flatMap((selector) => [
+      `${selector}:not([data-composer-surface-overflow="visible"])`,
+      `${selector}[data-composer-surface-overflow="visible"] > [data-composer-body]`,
+    ]),
+    alwaysPresent: false,
+    description: '输入框实际圆角背景',
   },
   floatingLayer: {
     selectors: [

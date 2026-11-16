@@ -1,11 +1,18 @@
 {
   "name": "OpenAI 启动画面",
   "description": "黑幕 OpenAI 标识、档案授权与环形核验，接龙娘背景的深色第二幕，再叠化回聊天。每个页面一次，支持跳过与 Esc。",
-  "version": 2,
+  "version": 4,
   "hosts": ["codex"],
   "enabled": false,
   "order": 110,
   "params": {
+    "displayName": {
+      "type": "text",
+      "default": "访客",
+      "maxLength": 48,
+      "label": "展示名称",
+      "description": "身份卡和欢迎语共用的名称，仅作为动画文案，不读取系统或账号名称"
+    },
     "duration": {
       "type": "number",
       "default": 26,

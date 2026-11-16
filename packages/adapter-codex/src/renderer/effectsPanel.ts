@@ -66,6 +66,16 @@ function switchControl(label: string, attributes: Record<string, string>): HTMLB
 
 function paramControl(id: string, key: string, spec: EffectParamSpec): HTMLElement {
   const data = { 'data-woodfish-effect-param': key, 'data-woodfish-effect-id': id };
+  if (spec.type === 'text') {
+    return element('input', 'woodfish-effect-text', {
+      type: 'text',
+      maxlength: String(spec.maxLength ?? 48),
+      'aria-label': spec.label,
+      autocomplete: 'off',
+      spellcheck: 'false',
+      ...data,
+    });
+  }
   if (spec.type === 'boolean') {
     return switchControl(spec.label, data);
   }

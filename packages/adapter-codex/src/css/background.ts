@@ -35,7 +35,13 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
   const topFade = selectorOf('mainTopFade');
   const footerFade = `${selectorOf('timeline')} .from-surface.pointer-events-none`;
   const footer = selectorOf('threadFooter');
+  // Current Codex paints the lower fade and inset on the footer parent's pseudo-elements.
+  // Match the stable data attribute instead of its generated footer-xxxx class.
+  const footerContainer = selectorOf('threadFooterContainer');
   const composer = CODEX_SELECTORS.composerLayout.selectors.join(',\n');
+  // An overflowing layout is a square positioning wrapper: Codex puts its rounded
+  // surface on the direct body instead. Paint that body without clipping its menus.
+  const composerPanels = CODEX_SELECTORS.composerPanel.selectors.join(',\n');
   const composerSurface =
     'var(--color-background-composer-surface, var(--color-surface-elevated-secondary))';
 
@@ -61,21 +67,27 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
       })
     ),
     rule(
-      `${topFade},\n${footerFade},\n${footer}`,
+      `${topFade},\n${footerFade},\n${footer},\n${footerContainer}::before,\n${footerContainer}::after`,
       buildBackgroundCopyDeclarations(background, { base: surface, image: fill })
     ),
     rule(topFade, ['  mask-image: linear-gradient(to bottom, #000, transparent);']),
     rule(footerFade, ['  mask-image: linear-gradient(to top, #000, transparent);']),
+    rule(`${footerContainer}::before`, [
+      '  mask-image: linear-gradient(to top, #000, transparent);',
+    ]),
     rule(composer, [
       '  --composer-layout-surface-background: transparent !important;',
       '  --composer-layout-surface-backdrop-filter: none !important;',
-      ...buildBackgroundCopyDeclarations(background, {
+    ]),
+    rule(
+      composerPanels,
+      buildBackgroundCopyDeclarations(background, {
         base: surface,
         image: fill,
         soft: true,
         tint: composerSurface,
-      }),
-    ]),
+      })
+    ),
   ].join('\n\n');
   return `@media not (prefers-reduced-transparency: reduce) {\n${css}\n}`;
 }

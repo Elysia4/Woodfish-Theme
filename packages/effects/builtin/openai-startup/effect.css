@@ -90,6 +90,57 @@
     transparent 78.2%
   );
 }
+.wos-plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(#11121005 1px, transparent 1px),
+    linear-gradient(90deg, #11121005 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse, transparent 20%, #000);
+}
+.wos-archive-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(transparent 45%, #49aab510 49%, #398c9e40 50%, transparent 51%);
+}
+.woodfish-openai-startup:is([data-stage='read'], [data-stage='verified']) .wos-archive-scan {
+  animation: wos-archive-scan 3.6s linear infinite;
+}
+.wos-waveform {
+  position: absolute;
+  left: 3.5%;
+  bottom: 15%;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+  opacity: 0.45;
+}
+.wos-wave-bar {
+  width: 2px;
+  height: 20px;
+  background: #4d858c;
+  transform: scaleY(0.2);
+  animation: wos-wave 1.5s calc(var(--wos-bar) * -130ms) ease-in-out infinite alternate;
+}
+.wos-ring-rim {
+  transform-origin: 250px 250px;
+  animation: wos-spin 36s linear infinite reverse;
+  stroke: #426c75;
+  stroke-width: 1;
+}
+.wos-rim-minor {
+  opacity: 0.35;
+}
+.wos-rim-major {
+  stroke: #bc7837;
+  stroke-width: 1.5;
+}
 .wos-panel {
   position: absolute;
   top: 2%;
@@ -275,6 +326,10 @@
 }
 .wos-card-value {
   font-weight: 600;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .wos-hex {
   display: none;
@@ -448,10 +503,36 @@
   transition: opacity 650ms ease;
 }
 .wos-boot-inner {
+  position: relative;
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: 12px;
+}
+.wos-boot-inner::before {
+  content: '';
+  position: absolute;
+  width: 270px;
+  height: 270px;
+  top: 40%;
+  left: 50%;
+  border: 1px solid #79d9ec25;
+  border-block-color: #79d9ec80;
+  border-radius: 50%;
+  box-shadow:
+    0 0 40px #59b9ef12,
+    inset 0 0 35px #59b9ef0c;
+  transform: translate(-50%, -50%);
+  animation: wos-orbit 9s linear infinite;
+}
+.wos-boot-telemetry {
+  position: absolute;
+  bottom: 11%;
+  text-align: center;
+  white-space: pre-line;
+  font: 8px/2.4 var(--wos-mono);
+  letter-spacing: 0.25em;
+  color: #7fa3b3;
 }
 .wos-boot-inner svg {
   width: 64px;
@@ -639,6 +720,10 @@
 .wos-hero-title {
   position: relative;
   width: fit-content;
+  /* Italic ink extends below the line box (p) and past the advance width (I).
+     Extend the gradient's paint box without moving the title or the text below. */
+  padding: 0.08em 0.18em 0.2em 0.08em;
+  margin: -0.08em -0.18em -0.2em -0.08em !important;
   font:
     italic 750 clamp(70px, 13.5vw, 190px)/1 'Segoe UI',
     sans-serif;
@@ -664,6 +749,7 @@
   position: absolute;
   inset: 2px 0 0 1px;
   z-index: -1;
+  padding: inherit;
   color: transparent;
   -webkit-text-stroke: 1px #819fbf40;
 }
@@ -685,10 +771,100 @@
   opacity: 0.6;
 }
 .wos-terminal {
-  margin-top: 45px !important;
+  margin-top: 28px !important;
   font: 10px var(--wos-mono);
   color: #58d5b1;
   opacity: 0.65;
+  white-space: pre-line;
+  line-height: 1.9;
+}
+.wos-hud-reticle {
+  position: absolute;
+  z-index: 1;
+  right: 1%;
+  top: 24%;
+  width: 57%;
+  pointer-events: none;
+  opacity: 0;
+  transform: rotate(-12deg);
+}
+.wos-hud-reticle svg {
+  width: 100%;
+  height: auto;
+  fill: #a0efff;
+  stroke: #8cdbff70;
+  stroke-width: 0.7;
+  stroke-dasharray: 310 18 4 18;
+}
+.wos-hud-dust {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 67% 22%, #bdefff 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 60%, #a3d9ff 0 1px, transparent 2px),
+    radial-gradient(circle at 58% 73%, #a3d9ff 0 1px, transparent 2px),
+    radial-gradient(circle at 93% 35%, #a3d9ff 0 1px, transparent 2px);
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-hud-reticle {
+  animation: wos-hud-in 3s 0.6s ease both;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-hud-reticle svg {
+  animation: wos-data-flow 12s linear infinite;
+}
+.woodfish-openai-startup[data-stage='cinema'] .wos-hud-dust {
+  animation: wos-dust 4s ease-in-out infinite alternate;
+}
+@keyframes wos-archive-scan {
+  from {
+    opacity: 0;
+    transform: translateY(-55%);
+  }
+  20%,
+  75% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(55%);
+  }
+}
+@keyframes wos-wave {
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes wos-orbit {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+@keyframes wos-data-flow {
+  to {
+    stroke-dashoffset: -350;
+  }
+}
+@keyframes wos-hud-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px) rotate(-12deg);
+  }
+  to {
+    opacity: 0.65;
+    transform: rotate(-12deg);
+  }
+}
+@keyframes wos-dust {
+  from {
+    opacity: 0.2;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 0.6;
+    transform: translateY(-6px);
+  }
 }
 .wos-enter {
   right: 3.5%;
@@ -935,6 +1111,19 @@
   }
 }
 @media (max-height: 560px) {
+  .wos-terminal {
+    margin-top: 14px !important;
+    font-size: 8px;
+  }
+  .wos-hero {
+    top: 33%;
+  }
+  .wos-hero-title {
+    font-size: clamp(60px, 11vw, 110px);
+  }
+  .wos-hero-zh {
+    margin-top: 12px !important;
+  }
   .wos-brand {
     top: 4%;
   }

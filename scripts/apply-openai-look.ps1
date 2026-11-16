@@ -1,5 +1,6 @@
 param(
-    [string]$ImagePath = (Join-Path $PSScriptRoot '../local/openai-dragon/background.png')
+    [string]$ImagePath = (Join-Path $PSScriptRoot '../local/openai-dragon/background.png'),
+    [string]$DisplayName
 )
 
 $ErrorActionPreference = 'Stop'
@@ -60,7 +61,14 @@ New-Item -ItemType Directory -Path $pluginTarget -Force | Out-Null
 foreach ($file in @('effect.js', 'effect.css', 'effect.json', 'README.md')) {
     Copy-Item -LiteralPath (Join-Path $pluginSource $file) -Destination (Join-Path $pluginTarget $file) -Force
 }
-$startupValues = @{ enabled = $true; duration = 26; requireInteraction = $true }
+$startupValues = @{ enabled = $true; duration = 26; requireInteraction = $true; displayName = '访客' }
+$startupParams = Join-Path $pluginTarget 'params.json'
+if (Test-Path -LiteralPath $startupParams) {
+    $saved = Get-Content -LiteralPath $startupParams -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach ($property in $saved.PSObject.Properties) { $startupValues[$property.Name] = $property.Value }
+}
+$startupValues['enabled'] = $true
+if ($PSBoundParameters.ContainsKey('DisplayName')) { $startupValues['displayName'] = $DisplayName }
 [IO.File]::WriteAllText((Join-Path $pluginTarget 'params.json'), ($startupValues | ConvertTo-Json), $utf8)
 
 & node $installedCli reload

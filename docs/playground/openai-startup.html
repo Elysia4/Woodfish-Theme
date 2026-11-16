@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OpenAI / Codex 启动画面预览</title>
-    <link rel="stylesheet" href="../../packages/effects/builtin/openai-startup/effect.css" />
+    <link rel="stylesheet" href="../../packages/effects/builtin/openai-startup/effect.css?v=4" />
     <style>
       :root {
         --woodfish-background-image: url('/local/openai-dragon/background.png');
@@ -65,7 +65,8 @@
       }
       nav button,
       nav label,
-      nav select {
+      nav select,
+      nav input {
         padding: 6px 10px;
         border: 1px solid #ffffff40;
         background: #24252c;
@@ -75,6 +76,14 @@
           11px 'Segoe UI',
           sans-serif;
         cursor: pointer;
+      }
+      #name {
+        width: 100px;
+      }
+      nav {
+        max-width: calc(100vw - 24px);
+        flex-wrap: wrap;
+        justify-content: flex-end;
       }
       #layer {
         position: fixed;
@@ -94,6 +103,7 @@
       <div class="composer">你想一起做些什么？</div>
     </main>
     <nav aria-label="预览控制">
+      <input id="name" type="text" maxlength="48" value="访客" aria-label="展示名称" />
       <button id="replay" type="button">重播启动画面</button>
       <select id="stage" aria-label="定位预览阶段">
         <option value="">完整播放</option>
@@ -151,7 +161,11 @@
         delete document.documentElement.dataset.woodfishOpenaiStartupSeen;
         instance = module.exports({
           layer,
-          params: { duration: 26, requireInteraction: true },
+          params: {
+            duration: 26,
+            requireInteraction: true,
+            displayName: document.querySelector('#name').value,
+          },
           simplified: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
           on(target, type, listener, options) {
             const wrapped = (event) => {
@@ -173,6 +187,7 @@
         });
       }
       document.querySelector('#replay').addEventListener('click', replay);
+      document.querySelector('#name').addEventListener('change', replay);
       document.querySelector('#stage').addEventListener('change', (event) => {
         const target = event.target.value;
         replay();

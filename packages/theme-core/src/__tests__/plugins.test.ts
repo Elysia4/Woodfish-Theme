@@ -135,4 +135,39 @@ describe('effect manifests', () => {
     expect(isEffectId('Typing')).toBe(false);
     expect(isEffectId('../x')).toBe(false);
   });
+
+  it('normalizes bounded text without turning names into CSS', () => {
+    const named = normalizeEffectManifest({
+      params: { displayName: { type: 'text', default: '访客', maxLength: 8 } },
+    });
+    expect(normalizeEffectValues(named, { displayName: '  龙娘\n同学  ' }).displayName).toBe(
+      '龙娘 同学'
+    );
+    expect(normalizeEffectValues(named, { displayName: '😀'.repeat(12) }).displayName).toBe(
+      '😀'.repeat(8)
+    );
+    expect(normalizeEffectValues(named, { displayName: '   ' }).displayName).toBe('访客');
+    expect(normalizeEffectValues(named, { displayName: 123 }).displayName).toBe('访客');
+    const value = normalizeEffectValues(named, { displayName: '</style>' });
+    expect(effectCssVariables('demo', named, value)).toEqual([]);
+    expect(effectValuesFromCss('demo', named, () => 'untrusted')).toEqual({});
+  });
+
+  it('validates text defaults and clamps text length limits', () => {
+    expect(() =>
+      normalizeEffectManifest({ params: { name: { type: 'text', default: 1 } } })
+    ).toThrow(/字符串/);
+    for (const [maxLength, expected] of [
+      [0, 1],
+      [500, 128],
+      [2.9, 2],
+      [undefined, 48],
+    ] as const) {
+      const spec = normalizeEffectManifest({
+        params: { name: { type: 'text', default: '  访客\n同学 ', maxLength } },
+      }).params.name;
+      expect(spec.maxLength).toBe(expected);
+      expect(Array.from(spec.default as string).length).toBeLessThanOrEqual(expected);
+    }
+  });
 });

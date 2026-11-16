@@ -367,7 +367,8 @@ export const SETTINGS_PANEL_CSS = `
   background-color: var(--color-surface-elevated, color-mix(in oklab, var(--color-text) 12%, transparent));
   box-shadow: 0 1px 2px rgb(0 0 0 / 18%);
 }
-[data-woodfish-codex-settings] .woodfish-effect-select {
+[data-woodfish-codex-settings] .woodfish-effect-select,
+[data-woodfish-codex-settings] .woodfish-effect-text {
   padding: 3px 8px;
   border: 1px solid var(--color-border);
   border-radius: 8px;

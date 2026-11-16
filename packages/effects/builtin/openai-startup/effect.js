@@ -11,6 +11,10 @@ module.exports = function openaiStartup(ctx) {
   const seconds = Number.isFinite(ctx.params.duration) ? ctx.params.duration : 26;
   const scale = Math.max(12, Math.min(40, seconds)) / 26;
   const interactive = ctx.params.requireInteraction !== false;
+  const displayName =
+    typeof ctx.params.displayName === 'string'
+      ? Array.from(ctx.params.displayName.trim()).slice(0, 48).join('') || '访客'
+      : '访客';
   const previousFocus = document.activeElement;
   const cancels = new Set();
   let pendingStep;
@@ -61,7 +65,14 @@ module.exports = function openaiStartup(ctx) {
       '读取完毕，核验通过',
       'PERMISSION AUTHORIZED',
     ],
-    ['welcome', 2600, '', '', '欢迎回来，Elysia。工作区已就绪。', 'WELCOME TO OPENAI CODEX'],
+    [
+      'welcome',
+      2600,
+      '',
+      '',
+      `欢迎回来，${displayName}。工作区已就绪。`,
+      'WELCOME TO OPENAI CODEX',
+    ],
     ['glitch', 600],
     ['cinema', 9100],
   ];
@@ -140,7 +151,7 @@ module.exports = function openaiStartup(ctx) {
   const actionArea = element('div', 'action-area');
   const card = element('dl', 'card');
   for (const [label, value] of [
-    ['身份名称', 'Elysia'],
+    ['身份名称', displayName],
     ['身份编号', '0001'],
     ['访问级别', 'L3'],
   ]) {
@@ -159,6 +170,18 @@ module.exports = function openaiStartup(ctx) {
   const reticle = element('div', 'reticle');
   reticle.setAttribute('aria-hidden', 'true');
   const rings = svgElement('svg', { viewBox: '0 0 500 500' });
+  const rim = svgElement('g', { class: 'wos-ring-rim' });
+  for (let index = 0; index < 72; index++) {
+    const angle = (index * Math.PI) / 36;
+    const inner = index % 6 === 0 ? 235 : 240;
+    rim.append(
+      svgElement('path', {
+        d: `M${250 + Math.sin(angle) * inner} ${250 + Math.cos(angle) * inner}L${250 + Math.sin(angle) * 246} ${250 + Math.cos(angle) * 246}`,
+        class: index % 6 === 0 ? 'wos-rim-major' : 'wos-rim-minor',
+      })
+    );
+  }
+  rings.append(rim);
   for (const [radius, name] of [
     [226, 'outer'],
     [157, 'middle'],
@@ -211,6 +234,14 @@ module.exports = function openaiStartup(ctx) {
   const progressBar = element('i', 'progress-bar');
   progress.append(progressBar);
   footer.append(badge, log, element('span', 'powered', 'POWERED BY OPENAI ▰'), progress);
+  const waveform = element('div', 'waveform');
+  waveform.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < 12; i++) {
+    const bar = element('i', 'wave-bar');
+    bar.style.setProperty('--wos-bar', i);
+    waveform.append(bar);
+  }
+  plate.append(element('div', 'archive-scan'), waveform);
   plate.append(
     panels,
     brand,
@@ -232,6 +263,13 @@ module.exports = function openaiStartup(ctx) {
     element('span', 'boot-sub', 'CODEX / INTELLIGENCE IN ACTION')
   );
   boot.append(bootInner, element('i', 'boot-sweep'));
+  const bootTelemetry = element(
+    'div',
+    'boot-telemetry',
+    'NEURAL ENGINE  /  INITIALIZING\nOPENAI · CODEX   //   LOCAL SESSION'
+  );
+  bootTelemetry.setAttribute('aria-hidden', 'true');
+  boot.append(bootTelemetry);
 
   const cinema = element('div', 'cinema');
   cinema.append(element('div', 'portrait'), element('div', 'wire'), element('div', 'scan'));
@@ -248,7 +286,11 @@ module.exports = function openaiStartup(ctx) {
     heroTitle,
     element('p', 'hero-zh', '欢迎来到专业工作模式'),
     element('p', 'hero-en', 'PROFESSIONAL WORK MODE'),
-    element('p', 'terminal', '> initializing codex_  ▮')
+    element(
+      'p',
+      'terminal',
+      '> neural interface ........ ONLINE\n> workspace channel ....... LINKED\n> initializing codex_  ▮'
+    )
   );
   cinema.append(
     hudTop,
@@ -257,6 +299,18 @@ module.exports = function openaiStartup(ctx) {
     element('span', 'hud-bottom', 'YOUR AI COMPANION\nBUILD A SMARTER FUTURE ━━━━━'),
     element('div', 'cinema-progress')
   );
+  const hudReticle = element('div', 'hud-reticle');
+  const orbitLines = svgElement('svg', { viewBox: '0 0 600 220', 'aria-hidden': 'true' });
+  orbitLines.append(
+    svgElement('path', {
+      d: 'M15 175C140 125 230 15 455 32S555 108 525 148M35 195C150 150 235 52 460 52',
+      fill: 'none',
+    })
+  );
+  orbitLines.append(svgElement('circle', { cx: '455', cy: '32', r: '3' }));
+  hudReticle.append(orbitLines);
+  hudReticle.setAttribute('aria-hidden', 'true');
+  cinema.append(hudReticle, element('div', 'hud-dust'));
   const enter = element('button', 'enter', '进入工作区 ↗');
   enter.type = 'button';
   enter.hidden = true;

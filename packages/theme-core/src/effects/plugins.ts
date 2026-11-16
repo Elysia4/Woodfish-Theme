@@ -11,7 +11,7 @@ import { isValidCssColor } from '../color/validate';
 export const EFFECT_HOSTS = ['codex', 'vscode'] as const;
 export type EffectHost = (typeof EFFECT_HOSTS)[number];
 
-export type EffectParamType = 'number' | 'boolean' | 'select' | 'color';
+export type EffectParamType = 'number' | 'boolean' | 'select' | 'color' | 'text';
 
 export interface EffectParamOption {
   value: string;
@@ -31,6 +31,8 @@ export interface EffectParamSpec {
   unit?: string;
   /** Selects only. */
   options?: EffectParamOption[];
+  /** Text only, measured in Unicode code points; never interpolated into CSS. */
+  maxLength?: number;
 }
 
 export interface EffectManifest {
@@ -98,6 +100,13 @@ function readParam(key: string, raw: unknown): EffectParamSpec {
   const spec = raw as Record<string, unknown>;
   const type = spec.type;
   const base = { label: text(spec.label, key), description: text(spec.description, '') };
+  if (type === 'text') {
+    if (typeof spec.default !== 'string') {
+      throw new EffectManifestError(`参数 ${key} 是 text，default 需要是字符串`);
+    }
+    const maxLength = Math.min(128, Math.max(1, Math.floor(finite(spec.maxLength) ?? 48)));
+    return { ...base, type, default: plainText(spec.default, maxLength), maxLength };
+  }
   if (type === 'number') {
     const min = finite(spec.min);
     const max = finite(spec.max);
@@ -134,7 +143,20 @@ function readParam(key: string, raw: unknown): EffectParamSpec {
     }
     return { ...base, type, default: spec.default };
   }
-  throw new EffectManifestError(`参数 ${key} 的 type 只能是 number / boolean / select / color`);
+  throw new EffectManifestError(
+    `参数 ${key} 的 type 只能是 number / boolean / select / color / text`
+  );
+}
+
+function plainText(value: string, maxLength: number): string {
+  return Array.from(
+    value
+      .replace(/\s+/gu, ' ')
+      .replace(/\p{Cc}/gu, '')
+      .trim()
+  )
+    .slice(0, maxLength)
+    .join('');
 }
 
 /**
@@ -190,6 +212,10 @@ function normalizeValue(spec: EffectParamSpec, value: unknown): number | boolean
         : spec.default;
     case 'color':
       return typeof value === 'string' && isValidCssColor(value) ? value : spec.default;
+    case 'text':
+      return typeof value === 'string'
+        ? plainText(value, spec.maxLength ?? 48) || spec.default
+        : spec.default;
   }
 }
 
@@ -237,6 +263,8 @@ export function effectCssVariables(
   values: EffectValues
 ): string[] {
   return Object.entries(manifest.params).flatMap(([key, spec]) => {
+    // Arbitrary display text is data, never a CSS declaration or computed override.
+    if (spec.type === 'text') return [];
     const name = effectCssVariable(id, key);
     const value = values[key];
     if (spec.type === 'boolean') {
@@ -282,6 +310,8 @@ function valueFromCss(spec: EffectParamSpec, text: string): number | boolean | s
       return isValidCssColor(text) ? text : undefined;
     case 'select':
       return spec.options?.some((option) => option.value === text) ? text : undefined;
+    case 'text':
+      return undefined;
   }
 }
 

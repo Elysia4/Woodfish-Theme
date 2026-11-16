@@ -90,4 +90,61 @@ describe('buildBackgroundCss', () => {
     expect(css).toContain('linear-gradient(180deg, #2990bd, #e2ab5b, #e384be)');
     expect(css).not.toContain('--woodfish-background-image');
   });
+
+  it.each(['default', 'opaque'])(
+    'paints the rounded body of an overflowing %s home composer, keeping its wrapper clear',
+    (variant) => {
+      const fixture = document.createElement('div');
+      fixture.innerHTML = `
+        <div data-codex-composer-root data-composer-placement="home">
+          <div id="home-layout" data-composer-surface-variant="${variant}" data-composer-surface-overflow="visible">
+            <div id="home-body" data-composer-body></div>
+            <div id="home-menu" role="listbox"></div>
+          </div>
+        </div>
+        <div data-codex-composer-root data-composer-placement="thread">
+          <div id="thread-layout" data-composer-surface-variant="${variant}" data-composer-surface-overflow="auto">
+            <div id="thread-body" data-composer-body></div>
+          </div>
+        </div>`;
+      const style = document.createElement('style');
+      style.textContent = buildBackgroundCss(view());
+      document.head.append(style);
+      try {
+        const media = style.sheet!.cssRules[0] as CSSMediaRule;
+        const painted = Array.from(media.cssRules).filter(
+          (rule): rule is CSSStyleRule =>
+            'style' in rule &&
+            (rule as CSSStyleRule).style.getPropertyValue('background-attachment') === 'fixed'
+        );
+        const paints = (id: string): boolean =>
+          painted.some((rule) => fixture.querySelector(`#${id}`)!.matches(rule.selectorText));
+        expect(paints('home-layout')).toBe(false);
+        expect(paints('home-body')).toBe(true);
+        expect(paints('home-menu')).toBe(false);
+        expect(paints('thread-layout')).toBe(true);
+        expect(paints('thread-body')).toBe(false);
+        // Keep menus, focus rings and the attached project rail free to overflow.
+        expect(painted.every((rule) => !rule.style.getPropertyValue('overflow'))).toBe(true);
+      } finally {
+        style.remove();
+      }
+    }
+  );
+
+  it('covers the current footer pseudo-elements with aligned background copies', () => {
+    const css = buildBackgroundCss(view());
+    const footer = '[data-request-input-activity-root] :has(> [data-thread-scroll-footer])';
+    for (const pseudo of ['::before', '::after']) {
+      const start = css.indexOf(`${footer}${pseudo}`);
+      expect(start).toBeGreaterThan(-1);
+      expect(css.slice(start, css.indexOf('}', start))).toContain(
+        'background-attachment: fixed !important;'
+      );
+    }
+    expect(css).toContain(
+      `${footer}::before {\n  mask-image: linear-gradient(to top, #000, transparent);`
+    );
+    expect(buildBackgroundCss(view('caiyun', null))).not.toContain(footer);
+  });
 });

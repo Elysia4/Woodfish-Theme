@@ -150,6 +150,30 @@ afterEach(() => {
 });
 
 describe('settings panel', () => {
+  it('edits and saves an effect display name as plain text', () => {
+    const saves = captureSaves();
+    const overlay = startCodexOverlay({}, 'cdp', [
+      particles(
+        { displayName: 'Elysia' },
+        {
+          ...PARTICLES,
+          params: {
+            ...PARTICLES.params,
+            displayName: { type: 'text', default: '访客', maxLength: 48, label: '展示名称' },
+          },
+        }
+      ),
+    ]);
+    const name = param('displayName') as HTMLInputElement;
+    expect(name.type).toBe('text');
+    expect(name.maxLength).toBe(48);
+    expect(name.value).toBe('Elysia');
+    name.value = '龙娘同学';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(overlay.effects()[0].values.displayName).toBe('龙娘同学');
+    jest.advanceTimersByTime(300);
+    expect(saves).toEqual([{ effects: { 'typing-particles': { displayName: '龙娘同学' } } }]);
+  });
   it('adds a Woodfish 外观 section after the visual style section, styled like Codex', () => {
     startCodexOverlay({ palette: { dark: 'dracula' } }, 'cdp', [particles()]);
     const section = panel();

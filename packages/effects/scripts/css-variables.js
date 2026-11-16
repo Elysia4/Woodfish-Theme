@@ -16,6 +16,7 @@ const kebab = (key) => key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase(
 const cell = (text) => String(text).replace(/\|/g, '\\|').replace(/\n/g, ' ');
 
 function cssValue(spec, value) {
+  if (spec.type === 'text') return JSON.stringify(value);
   if (spec.type === 'boolean') return value ? '1' : '0';
   if (spec.type === 'number') return `${value}${spec.unit || ''}`;
   return String(value);
@@ -23,6 +24,7 @@ function cssValue(spec, value) {
 
 /** A value other than the default, to show the format. */
 function example(spec) {
+  if (spec.type === 'text') return '你的名字';
   if (spec.type === 'boolean') return !spec.default;
   if (spec.type === 'color') return spec.default.toLowerCase() === '#ff4d4f' ? 'gold' : '#ff4d4f';
   if (spec.type === 'select') {
@@ -30,7 +32,8 @@ function example(spec) {
     return other.find((value) => value !== spec.default) || spec.default;
   }
   const span = spec.max - spec.min;
-  let value = spec.default + span / 4 <= spec.max ? spec.default + span / 4 : spec.default - span / 4;
+  let value =
+    spec.default + span / 4 <= spec.max ? spec.default + span / 4 : spec.default - span / 4;
   const step = spec.step || (span <= 2 ? 0.05 : 1);
   value = Math.round(value / step) * step;
   return Number(Math.min(spec.max, Math.max(spec.min, value)).toFixed(3));
@@ -38,6 +41,8 @@ function example(spec) {
 
 function purpose(spec) {
   const text = [spec.label, spec.description].filter(Boolean).join('：');
+  if (spec.type === 'text')
+    return `${text}。最多 ${spec.maxLength || 48} 字符；在设置或 params.json 修改，不映射 CSS`;
   if (spec.type === 'number') return `${text}。范围 ${spec.min}–${spec.max}${spec.unit || ''}`;
   if (spec.type === 'boolean') return `${text}。1 开，0 关`;
   if (spec.type === 'color') return `${text}。写 #rrggbb、颜色名、rgb() 或 hsl()`;
@@ -53,8 +58,7 @@ function variableSection(files = readBuiltinEffectFiles()) {
     .filter((file) => /^[a-z][a-z0-9-]*\/effect\.json$/.test(file))
     .map((file) => ({ id: file.split('/')[0], manifest: JSON.parse(files[file]) }))
     .sort(
-      (a, b) =>
-        (a.manifest.order ?? 100) - (b.manifest.order ?? 100) || a.id.localeCompare(b.id)
+      (a, b) => (a.manifest.order ?? 100) - (b.manifest.order ?? 100) || a.id.localeCompare(b.id)
     );
   const parts = [START];
   for (const { id, manifest } of effects) {
@@ -68,9 +72,13 @@ function variableSection(files = readBuiltinEffectFiles()) {
       '| --- | --- | --- | --- |'
     );
     for (const [key, spec] of Object.entries(manifest.params || {})) {
-      const name = `--woodfish-${id}-${kebab(key)}`;
+      const name = spec.type === 'text' ? `params.json: ${key}` : `--woodfish-${id}-${kebab(key)}`;
+      const sample =
+        spec.type === 'text'
+          ? `"${key}": ${cssValue(spec, example(spec))}`
+          : `${name}: ${cssValue(spec, example(spec))};`;
       parts.push(
-        `| \`${name}\` | ${cell(purpose(spec))} | \`${cssValue(spec, spec.default)}\` | \`${name}: ${cssValue(spec, example(spec))};\` |`
+        `| \`${name}\` | ${cell(purpose(spec))} | \`${cssValue(spec, spec.default)}\` | \`${sample}\` |`
       );
     }
   }
