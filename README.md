@@ -469,6 +469,8 @@ dsh 的 Web 版（`dsh web`，本机 `127.0.0.1:3080`）可以通过油猴用户
 
 ## 本地开发
 
+修改共享核心或效果参数后，需运行 `pnpm runtime:build` 重新生成 VS Code 的 `overlay-bootstrap.js`，并将生成文件随源码提交；`pnpm runtime:check` 和扩展测试会检查两者是否一致。
+
 ```bash
 pnpm install
 pnpm compile
