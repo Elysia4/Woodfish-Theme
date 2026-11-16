@@ -65,3 +65,6 @@ output/
 
 # Staged into the VSIX while packaging (scripts/paths.js)
 apps/vscode-extension/themes/shared/backgrounds/
+
+# 本机个人背景与应用前备份，不随仓库发布
+local/

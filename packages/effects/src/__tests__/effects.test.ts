@@ -282,6 +282,7 @@ describe('the shipped effects', () => {
       'caret-trail',
       'code-gradient',
       'glass',
+      'openai-startup',
       'rainbow-text',
       'stream-cursor',
       'text-reveal',

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenAI / Codex 启动画面预览</title>
+    <link rel="stylesheet" href="../../packages/effects/builtin/openai-startup/effect.css" />
+    <style>
+      :root {
+        --woodfish-background-image: url('/local/openai-dragon/background.png');
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: #f5f3ff;
+        font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        background: #202127;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(#202127a6, #202127a6), var(--woodfish-background-image);
+        background-position: center;
+        background-size: cover;
+      }
+      main {
+        max-width: 800px;
+        margin: 15vh auto;
+        padding: 32px;
+      }
+      main h1 {
+        font-size: clamp(36px, 6vw, 64px);
+        font-weight: 500;
+        letter-spacing: -2px;
+      }
+      main p {
+        line-height: 1.8;
+      }
+      .composer {
+        margin-top: 70px;
+        padding: 24px;
+        background: #24252cdd;
+        border: 1px solid #ffffff30;
+        border-radius: 24px;
+      }
+      nav {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 2;
+        display: flex;
+        gap: 12px;
+      }
+      nav button,
+      nav label {
+        padding: 10px 16px;
+        border: 1px solid #ffffff40;
+        background: #24252c;
+        color: #fff;
+        border-radius: 12px;
+        font: inherit;
+        cursor: pointer;
+      }
+      #layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>OPENAI / CODEX</p>
+      <h1>让想法，从这里开始。</h1>
+      <p>
+        这是启动效果的独立预览。开场淡出后会回到聊天窗口；实际背景由 Codex 中的 Woodfish 设置控制。
+      </p>
+      <div class="composer">你想一起做些什么？</div>
+    </main>
+    <nav aria-label="预览控制">
+      <button id="replay" type="button">重播启动画面</button>
+      <label
+        >换预览图片<input id="picture" type="file" accept="image/jpeg,image/png,image/webp" hidden
+      /></label>
+    </nav>
+    <div id="layer"></div>
+    <script>
+      const module = { exports: null };
+    </script>
+    <script src="../../packages/effects/builtin/openai-startup/effect.js"></script>
+    <script>
+      const layer = document.querySelector('#layer');
+      let cleanups = [];
+      let instance;
+      let pictureUrl;
+      function replay() {
+        instance?.dispose?.();
+        cleanups.forEach((fn) => fn());
+        cleanups = [];
+        delete document.documentElement.dataset.woodfishOpenaiStartupSeen;
+        instance = module.exports({
+          layer,
+          params: { duration: 4 },
+          simplified: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
+          on(target, type, listener) {
+            target.addEventListener(type, listener);
+            cleanups.push(() => target.removeEventListener(type, listener));
+          },
+          later(ms, fn) {
+            const id = setTimeout(fn, ms);
+            const cancel = () => clearTimeout(id);
+            cleanups.push(cancel);
+            return cancel;
+          },
+        });
+      }
+      document.querySelector('#replay').addEventListener('click', replay);
+      document.querySelector('#picture').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (pictureUrl) URL.revokeObjectURL(pictureUrl);
+        pictureUrl = URL.createObjectURL(file);
+        document.documentElement.style.setProperty(
+          '--woodfish-background-image',
+          `url("${pictureUrl}")`
+        );
+        replay();
+      });
+      replay();
+    </script>
+  </body>
+</html>

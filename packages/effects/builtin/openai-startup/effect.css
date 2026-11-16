@@ -1,0 +1,211 @@
+.woodfish-openai-startup {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: auto;
+  color: #252723;
+  background: #f4f4ee;
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  transition: opacity 450ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.woodfish-openai-startup::before,
+.woodfish-openai-startup::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.woodfish-openai-startup::before {
+  background-image: var(--woodfish-background-image, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1000ms ease;
+}
+
+.woodfish-openai-startup::after {
+  background-image:
+    linear-gradient(#25272309 1px, transparent 1px),
+    linear-gradient(90deg, #25272309 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(#000, transparent 40%, transparent 65%, #000);
+}
+
+.woodfish-openai-startup[data-stage='reveal']::before {
+  opacity: 0.52;
+}
+.woodfish-openai-startup[data-leaving='true'] {
+  opacity: 0;
+}
+
+.woodfish-openai-startup-header,
+.woodfish-openai-startup-footer {
+  position: absolute;
+  left: clamp(24px, 5vw, 80px);
+  right: clamp(24px, 5vw, 80px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.woodfish-openai-startup-header {
+  top: clamp(28px, 6vh, 64px);
+}
+.woodfish-openai-startup-signature {
+  display: grid;
+  gap: 8px;
+}
+.woodfish-openai-startup-signature strong {
+  font-size: 28px;
+  letter-spacing: -1px;
+  font-weight: 600;
+}
+.woodfish-openai-startup-signature span,
+.woodfish-openai-startup-eyebrow,
+.woodfish-openai-startup-footer {
+  font:
+    10px/1.6 Consolas,
+    monospace;
+  letter-spacing: 2px;
+}
+
+.woodfish-openai-startup button {
+  color: inherit;
+  border: 1px solid #25272335;
+  border-radius: 0;
+  background: #f4f4ee99;
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.woodfish-openai-startup button:hover {
+  background: #fff;
+  border-color: #252723;
+}
+.woodfish-openai-startup button:focus-visible {
+  outline: 2px solid #252723;
+  outline-offset: 5px;
+}
+.woodfish-openai-startup-skip {
+  font-size: 12px !important;
+}
+.woodfish-openai-startup-center {
+  position: absolute;
+  inset: 24% 20px 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.woodfish-openai-startup-title {
+  margin: 14px 0 0;
+  font-size: clamp(56px, 10vw, 120px);
+  line-height: 1.15;
+  letter-spacing: -0.065em;
+  font-weight: 500;
+}
+.woodfish-openai-startup-subtitle {
+  margin: 22px 0 30px;
+  font-size: clamp(13px, 1.6vw, 18px);
+  letter-spacing: 0.28em;
+}
+.woodfish-openai-startup-enter {
+  font-size: 12px !important;
+  letter-spacing: 3px;
+}
+.woodfish-openai-startup-eyebrow {
+  margin: 0;
+  opacity: 0.6;
+}
+
+.woodfish-openai-startup-orbit {
+  position: absolute;
+  z-index: -1;
+  width: min(60vw, 430px);
+  aspect-ratio: 1;
+  border: 1px solid #25272313;
+  border-radius: 50%;
+  outline: 1px dashed #25272325;
+  outline-offset: 18px;
+  animation: woodfish-openai-startup-orbit 24s linear infinite;
+}
+.woodfish-openai-startup-orbit::before,
+.woodfish-openai-startup-orbit::after {
+  content: '';
+  position: absolute;
+  background: #25272350;
+  width: 16px;
+  height: 1px;
+  left: calc(50% - 8px);
+}
+.woodfish-openai-startup-orbit::before {
+  top: -19px;
+}
+.woodfish-openai-startup-orbit::after {
+  bottom: -19px;
+}
+.woodfish-openai-startup-footer {
+  bottom: clamp(28px, 6vh, 64px);
+  font-size: 9px;
+}
+.woodfish-openai-startup-progress {
+  flex: 1;
+  max-width: 240px;
+  height: 2px;
+  background: #25272315;
+  overflow: hidden;
+}
+.woodfish-openai-startup-progress span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #252723;
+  transform-origin: left;
+  animation: woodfish-openai-startup-progress var(--woodfish-openai-startup-runtime, 4000ms) linear
+    both;
+}
+
+@keyframes woodfish-openai-startup-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes woodfish-openai-startup-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:root[data-woodfish-paused] .woodfish-openai-startup * {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .woodfish-openai-startup {
+    display: none;
+  }
+  .woodfish-openai-startup * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@media (max-width: 600px) {
+  .woodfish-openai-startup-footer {
+    gap: 14px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .woodfish-openai-startup-footer > span:first-child {
+    display: none;
+  }
+}

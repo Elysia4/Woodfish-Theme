@@ -414,6 +414,16 @@ code --install-extension woodfish-theme-7.2.0.vsix
 
 ## Codex 桌面端
 
+### 本地定制：OpenAI 启动画面
+
+新增可选的 `openai-startup` 效果：暖白 OpenAI / Codex 开场、环形刻度和当前背景的渐入，默认停留 4 秒，再用 450ms 淡入聊天。设置 → 外观 → Woodfish 中开启「OpenAI 启动画面」，点「跳过」「进入工作区」或按 Esc 可提前结束。每个窗口页面只播放一次，调整效果不会反复挡住聊天；减少动态或在后台首次加载时跳过。
+
+这是窗口页面加载后的效果，不替换 Codex 原生的启动窗口。背景继续使用现有静态图片功能：`woodfish codex background set <图片路径>`，或者在外观设置里上传 JPG / PNG / WebP。图片保存在本机，个人素材和设置备份放在被 Git 忽略的 `local/` 下；目前不支持视频背景。
+
+预览使用实际插件代码：[OpenAI 启动画面预览](./docs/playground/openai-startup.html)，需从仓库根目录启动静态 HTTP 服务后打开。效果说明与时长参数见 [openai-startup](./packages/effects/builtin/openai-startup/README.md)。
+
+已有 Windows Woodfish 安装时，可在仓库根目录运行 `./scripts/apply-openai-look.ps1 -ImagePath '本机图片路径'`。脚本先把相关旧设置备份到 `local/openai-dragon/backup-*`，再通过已安装 CLI 保存图片，开启启动插件，并将背景透出、面板遮罩和模糊设为 22%、65%、14px；只刷新效果，不重启 Codex。未指定路径时读取 `local/openai-dragon/background.png`。以后换静态图直接运行 `woodfish codex background set <新图片路径>` 即可。
+
 Woodfish 也能给 OpenAI Codex 桌面版换上同样的配色和效果：彩虹回复字、吐字光标和拖尾、选中会话的光环、毛玻璃、《彩云》背景（见上面的[效果一览](#效果一览)）。需要 Windows 10 / 11 上的 Microsoft Store 版 Codex。
 
 **让 AI 帮你装**：把这句话发给你正在用的 AI（Codex、Claude Code、Cursor……都行），它会装好 Woodfish，让效果在 Codex 重启、更新、重新开机之后一直都在；要你拍板的地方（同意调试端口的风险说明、重启 Codex）会停下来问你。

@@ -210,4 +210,10 @@
 | `--woodfish-code-gradient-glow` | 代码发光：代码文字带一层柔和光晕（默认关闭）。1 开，0 关 | `0` | `--woodfish-code-gradient-glow: 1;` |
 | `--woodfish-code-gradient-glow-intensity` | 发光强度：发光打开时的强弱。范围 0.1–3 | `1` | `--woodfish-code-gradient-glow-intensity: 1.7;` |
 
+### OpenAI 启动画面（`openai-startup`，Codex，默认关闭）
+
+| 变量 | 作用 | 默认值 | 示例 |
+| --- | --- | --- | --- |
+| `--woodfish-openai-startup-duration` | 停留时间：开场停留秒数，随后用 450ms 淡入聊天界面。范围 2–8s | `4s` | `--woodfish-openai-startup-duration: 5.5s;` |
+
 <!-- 参数变量清单结束 -->
