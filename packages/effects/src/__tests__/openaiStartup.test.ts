@@ -116,9 +116,23 @@ describe('OpenAI startup reference sequence', () => {
   it('can play automatically without confirmation and leaves no timers after fading', () => {
     context.params.requireInteraction = false;
     factory(context);
-    jest.advanceTimersByTime(28000);
+    jest.advanceTimersByTime(26000);
+    expect(overlay()?.hasAttribute('data-workspace-reveal')).toBe(true);
+    jest.advanceTimersByTime(900);
     expect(overlay()).toBeNull();
     expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('reveals the workspace when entering it from the final scene', () => {
+    context.params.requireInteraction = false;
+    factory(context);
+    jest.advanceTimersByTime(20000);
+    expect(overlay()?.dataset.stage).toBe('cinema');
+    expect(overlay()?.hasAttribute('data-workspace-reveal')).toBe(false);
+    layer.querySelector<HTMLButtonElement>('.wos-enter')?.click();
+    expect(overlay()?.hasAttribute('data-workspace-reveal')).toBe(true);
+    jest.advanceTimersByTime(900);
+    expect(overlay()).toBeNull();
   });
 
   it.each(['boot', 'permission', 'identity', 'cinema'])('can skip during %s', (stage) => {
@@ -237,6 +251,7 @@ describe('OpenAI startup reference sequence', () => {
     factory(context);
     context.simplified = () => true;
     document.dispatchEvent(new Event('visibilitychange'));
+    expect(overlay()?.hasAttribute('data-workspace-reveal')).not.toBe(true);
     jest.advanceTimersByTime(1000);
     expect(overlay()).toBeNull();
     expect(jest.getTimerCount()).toBe(0);

@@ -354,6 +354,7 @@ function playStartup(ctx) {
     leaving = true;
     cancelPending();
     screen.dataset.leaving = 'true';
+    screen.toggleAttribute('data-workspace-reveal', !ctx.simplified());
     screen.style.pointerEvents = 'none';
     // 淡出时立即归还键盘焦点，避免透明按钮继续截获输入。
     if (screen.contains(document.activeElement) && previousFocus?.isConnected)

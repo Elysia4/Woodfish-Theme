@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OpenAI / Codex 启动画面预览</title>
-    <link rel="stylesheet" href="../../packages/effects/builtin/openai-startup/effect.css?v=4" />
+    <link rel="stylesheet" href="../../packages/effects/builtin/openai-startup/effect.css?v=6" />
     <style>
       :root {
         --woodfish-background-image: url('/local/openai-dragon/background.png');
@@ -42,6 +42,23 @@
       }
       main p {
         line-height: 1.8;
+      }
+      aside {
+        position: fixed;
+        inset: 18px auto 18px 18px;
+        width: 170px;
+        padding: 18px;
+        border-right: 1px solid #ffffff30;
+      }
+      @media (min-width: 760px) {
+        main {
+          margin-left: max(205px, calc((100% - 800px) / 2));
+        }
+      }
+      @media (max-width: 759px) {
+        aside {
+          display: none;
+        }
       }
       .composer {
         margin-top: 70px;
@@ -94,13 +111,19 @@
     </style>
   </head>
   <body>
-    <main>
-      <p>OPENAI / CODEX</p>
-      <h1>让想法，从这里开始。</h1>
-      <p>
-        这是启动效果的独立预览。开场淡出后会回到聊天窗口；实际背景由 Codex 中的 Woodfish 设置控制。
-      </p>
-      <div class="composer">你想一起做些什么？</div>
+    <aside data-sidebar-navigation-root>
+      <strong>Codex</strong>
+      <p>新聊天</p>
+      <p>项目</p>
+    </aside>
+    <main data-app-action-timeline-scroll>
+      <section data-rail-chat-transcript>
+        <p>OPENAI / CODEX</p>
+        <h1>让想法，从这里开始。</h1>
+      </section>
+      <div data-codex-composer-root>
+        <div class="composer" data-composer-surface-variant="default">你想一起做些什么？</div>
+      </div>
     </main>
     <nav aria-label="预览控制">
       <input id="name" type="text" maxlength="48" value="访客" aria-label="展示名称" />
