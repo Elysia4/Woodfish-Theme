@@ -38,6 +38,8 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
   });
   const topFade = selectorOf('mainTopFade');
   const pluginPageHeader = selectorOf('pluginPageHeader');
+  const settingsPanel = selectorOf('settingsPanel');
+  const settingsCard = selectorOf('settingsCard');
   const footerFade = `${selectorOf('timeline')} .from-surface.pointer-events-none`;
   const footer = selectorOf('threadFooter');
   // Current Codex paints the lower fade and inset on the footer parent's pseudo-elements.
@@ -67,6 +69,28 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     rule(selectorOf('appShellSurfaceBacking'), windowBackground),
     rule(selectorOf('sidebar'), windowBackground),
     rule(`${pluginPageHeader}::before`, windowBackground),
+    rule(settingsPanel, [
+      '  --color-border: color-mix(in oklab, var(--color-text) 9%, transparent);',
+      '  --color-border-subtle: color-mix(in oklab, var(--color-text) 6%, transparent);',
+    ]),
+    rule(settingsCard, [
+      '  position: relative;',
+      '  isolation: isolate;',
+      '  padding-inline: 12px;',
+      '  border-radius: 14px;',
+    ]),
+    // Isolate the blur on a decorative layer so controls keep their positioning and hit areas.
+    rule(`${settingsCard}::before`, [
+      '  content: "";',
+      '  position: absolute;',
+      '  inset: 0;',
+      '  z-index: -1;',
+      '  pointer-events: none;',
+      '  border-radius: inherit;',
+      '  background-color: color-mix(in oklab, var(--color-surface) 30%, transparent);',
+      '  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-text) 12%, transparent);',
+      '  backdrop-filter: blur(6px);',
+    ]),
     rule(
       `${topFade},\n${footerFade},\n${footer},\n${footerContainer}::before,\n${footerContainer}::after`,
       windowBackground

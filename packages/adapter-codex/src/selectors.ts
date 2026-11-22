@@ -157,6 +157,19 @@ export const CODEX_SELECTORS = {
     alwaysPresent: false,
     description: '插件页标题底板',
   },
+  settingsPanel: {
+    selectors: ['[data-settings-panel]'],
+    alwaysPresent: false,
+    description: '设置内容',
+  },
+  settingsCard: {
+    // The native stacked group draws its intra-row dividers with this Tailwind utility.
+    selectors: [
+      '[data-settings-panel] section > [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])',
+    ],
+    alwaysPresent: false,
+    description: '设置分组卡片',
+  },
   threadFooter: {
     selectors: ['[data-thread-scroll-footer] > .bg-surface.pointer-events-none'],
     alwaysPresent: false,

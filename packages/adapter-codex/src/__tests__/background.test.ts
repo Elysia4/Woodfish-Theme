@@ -72,8 +72,9 @@ describe('buildBackgroundCss', () => {
       'background-attachment: fixed !important;'
     );
     expect(css).toContain('mask-image: linear-gradient(to bottom, #000, transparent);');
-    // No live backdrop filter anywhere: it is recomputed every frame while a reply streams.
-    expect(css).not.toContain('backdrop-filter: blur');
+    // Live blur is limited to the settings cards, away from streaming replies.
+    const blurRules = css.split('}').filter((block) => block.includes('backdrop-filter: blur'));
+    expect(blurRules.every((block) => block.includes('[data-settings-panel]'))).toBe(true);
     expect(css).toContain('var(--woodfish-background-image, none)');
   });
 
@@ -110,6 +111,17 @@ describe('buildBackgroundCss', () => {
         rule.includes('mask-image: linear-gradient(to bottom, #000, transparent)')
       )
     ).toBe(true);
+  });
+
+  it('paints a small frosted layer and a rounded outline behind grouped settings rows', () => {
+    const css = buildBackgroundCss(view());
+    const card =
+      '[data-settings-panel] section > [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])';
+    const layer = css.split('}').find((block) => block.includes(`${card}::before {`)) ?? '';
+    expect(layer).toContain('backdrop-filter: blur(6px);');
+    expect(layer).toContain('box-shadow: inset 0 0 0 1px');
+    expect(layer).toContain('border-radius: inherit;');
+    expect(layer).toContain('pointer-events: none;');
   });
 
   it.each(['default', 'opaque'])(
