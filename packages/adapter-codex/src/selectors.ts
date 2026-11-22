@@ -25,6 +25,16 @@ export const CODEX_SELECTORS = {
     alwaysPresent: true,
     description: '主界面',
   },
+  appShellSurfaceBacking: {
+    selectors: ['[data-app-shell-surface-backing]'],
+    alwaysPresent: false,
+    description: '主界面背景底板',
+  },
+  appShellFrame: {
+    selectors: ['[data-app-shell-frame]'],
+    alwaysPresent: false,
+    description: '窗口内容框架',
+  },
   page: {
     // Pages other than the thread (Settings, plugins) paint the surface on this container.
     selectors: ['[data-codex-history-swipe-page] > .electron\\:bg-surface'],
@@ -133,9 +143,19 @@ export const CODEX_SELECTORS = {
   // Codex's own fades and the strip behind the composer, which the window background
   // turns into blur-only bands (content scrolls under them).
   mainTopFade: {
-    selectors: ['[data-app-shell-main-content-top-fade] > [aria-hidden="true"]'],
+    selectors: [
+      '[data-app-shell-main-content-top-fade] > [aria-hidden="true"]',
+      '[data-app-shell-main-surface] [aria-hidden="true"][class*="bg-[image:var(--app-shell-content-fade,"]',
+    ],
     alwaysPresent: false,
     description: '主区顶部渐隐',
+  },
+  pluginPageHeader: {
+    selectors: [
+      '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-store-page-search)',
+    ],
+    alwaysPresent: false,
+    description: '插件页标题底板',
   },
   threadFooter: {
     selectors: ['[data-thread-scroll-footer] > .bg-surface.pointer-events-none'],

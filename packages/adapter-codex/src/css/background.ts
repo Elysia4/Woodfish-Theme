@@ -15,9 +15,9 @@ function rule(selector: string, declarations: string[]): string {
 
 /**
  * The window background in Codex. The layer sits under the whole window; the thread, the
- * window frame and pages like Settings are cleared so it shows through. The sidebar and
- * the composer are frosted panels and Codex's own fades and the strip behind the composer
- * (content scrolls under them) become copies of the layer. Every one of them is a static
+ * window frame and pages like Settings share that background. The composer uses a
+ * frosted copy. Codex's fades and the strip behind the composer (content scrolls under
+ * them) use the original. Every one of them is a static
  * image pinned to the window, no backdrop-filter: measured in a streaming reply, live
  * filters on these areas roughly doubled the frame time (the running indicator, the caret
  * and the text scrolling under the composer force a recompute every frame).
@@ -32,7 +32,12 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     background.image === CODEX_GRADIENT_BACKGROUND_ID
       ? buildBackgroundFillImage(background.fill)
       : undefined;
+  const windowBackground = buildBackgroundCopyDeclarations(background, {
+    base: surface,
+    image: fill,
+  });
   const topFade = selectorOf('mainTopFade');
+  const pluginPageHeader = selectorOf('pluginPageHeader');
   const footerFade = `${selectorOf('timeline')} .from-surface.pointer-events-none`;
   const footer = selectorOf('threadFooter');
   // Current Codex paints the lower fade and inset on the footer parent's pseudo-elements.
@@ -57,18 +62,14 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     rule(`main.bg-surface,\n${selectorOf('appShell')},\n${selectorOf('page')}`, [
       '  background-color: transparent !important;',
     ]),
-    rule(
-      selectorOf('sidebar'),
-      buildBackgroundCopyDeclarations(background, {
-        base: surface,
-        image: fill,
-        soft: true,
-        tint: surface,
-      })
-    ),
+    rule(selectorOf('appShellFrame'), windowBackground),
+    // Newer Codex draws a separate backing behind the transparent main surface.
+    rule(selectorOf('appShellSurfaceBacking'), windowBackground),
+    rule(selectorOf('sidebar'), windowBackground),
+    rule(`${pluginPageHeader}::before`, windowBackground),
     rule(
       `${topFade},\n${footerFade},\n${footer},\n${footerContainer}::before,\n${footerContainer}::after`,
-      buildBackgroundCopyDeclarations(background, { base: surface, image: fill })
+      windowBackground
     ),
     rule(topFade, ['  mask-image: linear-gradient(to bottom, #000, transparent);']),
     rule(footerFade, ['  mask-image: linear-gradient(to top, #000, transparent);']),

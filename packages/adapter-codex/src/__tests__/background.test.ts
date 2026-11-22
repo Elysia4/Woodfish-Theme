@@ -66,14 +66,6 @@ describe('buildBackgroundCss', () => {
     expect(css).toContain(
       'main.bg-surface,\n[data-app-shell-main-surface],\n[data-codex-history-swipe-page] > .electron\\:bg-surface {\n  background-color: transparent !important;'
     );
-    // Frosted panels: the pre-blurred copy under the luminosity layer and a 35 % tint.
-    const sidebar = css.slice(css.indexOf('[data-sidebar-navigation-root] {'));
-    expect(sidebar.slice(0, sidebar.indexOf('}'))).toContain(
-      'var(--woodfish-codex-surface) 35%, transparent)'
-    );
-    expect(sidebar.slice(0, sidebar.indexOf('}'))).toContain(
-      'var(--woodfish-background-image-soft'
-    );
     expect(css).toContain('--composer-layout-surface-backdrop-filter: none !important;');
     const footer = css.slice(css.indexOf('[data-thread-scroll-footer]'));
     expect(footer.slice(0, footer.indexOf('}'))).toContain(
@@ -89,6 +81,35 @@ describe('buildBackgroundCss', () => {
     const css = buildBackgroundCss(view(CODEX_GRADIENT_BACKGROUND_ID));
     expect(css).toContain('linear-gradient(180deg, #2990bd, #e2ab5b, #e384be)');
     expect(css).not.toContain('--woodfish-background-image');
+  });
+
+  it.each([
+    '[data-app-shell-surface-backing]',
+    '[data-app-shell-frame]',
+    '[data-sidebar-navigation-root]',
+    '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-store-page-search)::before',
+  ])('draws the same unblurred window background on %s', (selector) => {
+    const css = buildBackgroundCss(view());
+    const rule = css.split('}').find((block) => block.includes(`${selector} {`)) ?? '';
+    expect(rule).toContain('var(--woodfish-background-image, none)');
+    expect(rule).not.toContain('--woodfish-background-image-soft');
+    expect(rule).not.toContain('--woodfish-background-luminosity');
+    expect(rule).toContain('background-attachment: fixed !important;');
+  });
+
+  it('uses the wallpaper for the current thread top fade while keeping its mask', () => {
+    const css = buildBackgroundCss(view());
+    const fade =
+      '[data-app-shell-main-surface] [aria-hidden="true"][class*="bg-[image:var(--app-shell-content-fade,"]';
+    const rules = css.split('}').filter((block) => block.includes(fade));
+    expect(rules.some((rule) => rule.includes('var(--woodfish-background-image, none)'))).toBe(
+      true
+    );
+    expect(
+      rules.some((rule) =>
+        rule.includes('mask-image: linear-gradient(to bottom, #000, transparent)')
+      )
+    ).toBe(true);
   });
 
   it.each(['default', 'opaque'])(
