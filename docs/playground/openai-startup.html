@@ -167,6 +167,7 @@
             displayName: document.querySelector('#name').value,
           },
           simplified: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
+          reducedMotion: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
           on(target, type, listener, options) {
             const wrapped = (event) => {
               if (type === 'click' || type === 'keydown') paused = false;

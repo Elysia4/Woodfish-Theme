@@ -5,6 +5,7 @@ interface StartupContext {
   layer: HTMLElement;
   params: { duration: number; requireInteraction: boolean; displayName?: string };
   simplified: () => boolean;
+  reducedMotion: () => boolean;
   on: (target: EventTarget, type: string, listener: EventListener, options?: boolean) => void;
   later: (ms: number, fn: () => void) => () => void;
 }
@@ -26,6 +27,7 @@ beforeEach(() => {
     layer,
     params: { duration: 26, requireInteraction: true, displayName: 'Elysia' },
     simplified: () => false,
+    reducedMotion: () => false,
     on: (target, type, listener, options) => {
       target.addEventListener(type, listener, options);
       cleanups.push(() => target.removeEventListener(type, listener, options));
@@ -172,9 +174,42 @@ describe('OpenAI startup reference sequence', () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('skips when simplified motion is requested', () => {
-    context.simplified = () => true;
+  it.each(['focus', 'visibilitychange'])('starts once when %s makes the window active', (type) => {
+    let active = false;
+    context.simplified = () => !active;
+    const target = type === 'focus' ? window : document;
     factory(context);
+    target.dispatchEvent(new Event(type));
+    expect(overlay()).toBeNull();
+    expect(jest.getTimerCount()).toBe(0);
+
+    active = true;
+    target.dispatchEvent(new Event(type));
+    const screen = overlay();
+    expect(screen?.dataset.stage).toBe('boot');
+    window.dispatchEvent(new Event('focus'));
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(overlay()).toBe(screen);
+    expect(layer.querySelectorAll('[data-woodfish-openai-startup]')).toHaveLength(1);
+  });
+
+  it('cancels deferred playback when the effect is disposed', () => {
+    context.simplified = () => true;
+    const instance = factory(context);
+    instance.dispose?.();
+    context.simplified = () => false;
+    window.dispatchEvent(new Event('focus'));
+    expect(overlay()).toBeNull();
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('skips when reduced motion is requested', () => {
+    context.simplified = () => true;
+    context.reducedMotion = () => true;
+    factory(context);
+    context.simplified = () => false;
+    context.reducedMotion = () => false;
+    window.dispatchEvent(new Event('focus'));
     expect(overlay()).toBeNull();
     expect(jest.getTimerCount()).toBe(0);
   });

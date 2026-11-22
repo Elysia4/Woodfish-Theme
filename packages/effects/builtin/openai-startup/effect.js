@@ -5,8 +5,28 @@
  */
 module.exports = function openaiStartup(ctx) {
   const root = document.documentElement;
-  if (root.dataset.woodfishOpenaiStartupSeen || ctx.simplified()) return {};
-  root.dataset.woodfishOpenaiStartupSeen = 'true';
+  if (root.dataset.woodfishOpenaiStartupSeen || ctx.reducedMotion()) return {};
+  if (!ctx.simplified()) return playStartup(ctx);
+
+  // The watcher can inject before Codex's new window receives focus.
+  let playback;
+  let disposed = false;
+  function startWhenActive() {
+    if (disposed || root.dataset.woodfishOpenaiStartupSeen || ctx.simplified()) return;
+    playback = playStartup(ctx);
+  }
+  ctx.on(window, 'focus', startWhenActive);
+  ctx.on(document, 'visibilitychange', startWhenActive);
+  return {
+    dispose() {
+      disposed = true;
+      playback?.dispose();
+    },
+  };
+};
+
+function playStartup(ctx) {
+  document.documentElement.dataset.woodfishOpenaiStartupSeen = 'true';
 
   const seconds = Number.isFinite(ctx.params.duration) ? ctx.params.duration : 26;
   const scale = Math.max(12, Math.min(40, seconds)) / 26;
@@ -422,4 +442,4 @@ module.exports = function openaiStartup(ctx) {
   next();
   later(120000, leave);
   return { dispose: remove };
-};
+}
