@@ -9,12 +9,13 @@ interface GlassContext {
   on: (target: EventTarget, type: string, listener: EventListener, capture?: boolean) => void;
 }
 
-const marker = 'data-woodfish-chat-preview-position';
-const anchorProperty = '--woodfish-chat-preview-anchor';
+const marker = 'data-woodfish-preview-position';
+const anchorProperty = '--woodfish-preview-anchor';
 
-function hint(anchor: string): HTMLElement {
+function popover(anchor: string, kind: 'hint' | 'manual' = 'hint'): HTMLElement {
   const wrapper = document.createElement('div');
-  wrapper.setAttribute('popover', 'hint');
+  wrapper.setAttribute('popover', kind);
+  if (kind === 'manual') wrapper.setAttribute('role', 'dialog');
   wrapper.innerHTML =
     '<div data-anchor-positioning="native" data-placement="inline-end-start"></div>';
   const card = wrapper.firstElementChild as HTMLElement;
@@ -29,7 +30,7 @@ function toggle(wrapper: HTMLElement, newState: 'open' | 'closed'): void {
   wrapper.dispatchEvent(event);
 }
 
-describe('sidebar conversation preview positioning', () => {
+describe('sidebar preview positioning', () => {
   const listeners: Array<() => void> = [];
   let dispose: () => void;
   const style = jest.fn<void, [string]>();
@@ -60,8 +61,8 @@ describe('sidebar conversation preview positioning', () => {
   });
 
   it('anchors only the opening chat hint and clears positioning when it closes', () => {
-    const wrapper = hint('--chat-preview-example');
-    const unrelated = hint('--other-preview');
+    const wrapper = popover('--chat-preview-example');
+    const unrelated = popover('--other-preview');
     expect(wrapper.hasAttribute(marker)).toBe(false);
     toggle(unrelated, 'open');
     expect(unrelated.hasAttribute(marker)).toBe(false);
@@ -70,7 +71,7 @@ describe('sidebar conversation preview positioning', () => {
     expect(wrapper.hasAttribute(marker)).toBe(true);
     expect(wrapper.style.getPropertyValue(anchorProperty)).toBe('--chat-preview-example');
     expect(style).toHaveBeenCalledWith(
-      expect.stringContaining('position-anchor: var(--woodfish-chat-preview-anchor)')
+      expect.stringContaining('position-anchor: var(--woodfish-preview-anchor)')
     );
 
     toggle(wrapper, 'closed');
@@ -79,10 +80,27 @@ describe('sidebar conversation preview positioning', () => {
   });
 
   it('cleans up an open hint when the effect is disposed', () => {
-    const wrapper = hint('--chat-preview-example');
+    const wrapper = popover('--chat-preview-example');
     toggle(wrapper, 'open');
     expect(wrapper.hasAttribute(marker)).toBe(true);
     dispose();
+    expect(wrapper.hasAttribute(marker)).toBe(false);
+    expect(wrapper.style.getPropertyValue(anchorProperty)).toBe('');
+  });
+
+  it('anchors only the manual dialog that belongs to a project row', () => {
+    const anchor = document.createElement('div');
+    Object.defineProperty(anchor.style, 'anchorName', { value: '--native-popover-project' });
+    anchor.innerHTML = '<div data-app-action-sidebar-project-row></div>';
+    document.body.append(anchor);
+    const wrapper = popover('--native-popover-project', 'manual');
+    const unrelated = popover('--native-popover-other', 'manual');
+    toggle(unrelated, 'open');
+    expect(unrelated.hasAttribute(marker)).toBe(false);
+    toggle(wrapper, 'open');
+    expect(wrapper.hasAttribute(marker)).toBe(true);
+    expect(wrapper.style.getPropertyValue(anchorProperty)).toBe('--native-popover-project');
+    toggle(wrapper, 'closed');
     expect(wrapper.hasAttribute(marker)).toBe(false);
     expect(wrapper.style.getPropertyValue(anchorProperty)).toBe('');
   });

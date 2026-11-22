@@ -37,9 +37,14 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     image: fill,
   });
   const topFade = selectorOf('mainTopFade');
-  const pluginPageHeader = selectorOf('pluginPageHeader');
+  const pluginPageHeaderBackdrop = CODEX_SELECTORS.pluginPageHeader.selectors
+    .map((selector) => `${selector}::before`)
+    .join(',\n');
   const settingsPanel = selectorOf('settingsPanel');
   const settingsCard = selectorOf('settingsCard');
+  const settingsCardBackdrop = CODEX_SELECTORS.settingsCard.selectors
+    .map((selector) => `${selector}::before`)
+    .join(',\n');
   const footerFade = `${selectorOf('timeline')} .from-surface.pointer-events-none`;
   const footer = selectorOf('threadFooter');
   // Current Codex paints the lower fade and inset on the footer parent's pseudo-elements.
@@ -68,7 +73,7 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     // Newer Codex draws a separate backing behind the transparent main surface.
     rule(selectorOf('appShellSurfaceBacking'), windowBackground),
     rule(selectorOf('sidebar'), windowBackground),
-    rule(`${pluginPageHeader}::before`, windowBackground),
+    rule(pluginPageHeaderBackdrop, windowBackground),
     rule(settingsPanel, [
       '  --color-border: color-mix(in oklab, var(--color-text) 9%, transparent);',
       '  --color-border-subtle: color-mix(in oklab, var(--color-text) 6%, transparent);',
@@ -80,7 +85,7 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
       '  border-radius: 14px;',
     ]),
     // Isolate the blur on a decorative layer so controls keep their positioning and hit areas.
-    rule(`${settingsCard}::before`, [
+    rule(settingsCardBackdrop, [
       '  content: "";',
       '  position: absolute;',
       '  inset: 0;',

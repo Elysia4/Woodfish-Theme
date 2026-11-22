@@ -153,6 +153,7 @@ export const CODEX_SELECTORS = {
   pluginPageHeader: {
     selectors: [
       '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-store-page-search)',
+      '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-page-search)',
     ],
     alwaysPresent: false,
     description: '插件页标题底板',
@@ -165,7 +166,7 @@ export const CODEX_SELECTORS = {
   settingsCard: {
     // The native stacked group draws its intra-row dividers with this Tailwind utility.
     selectors: [
-      '[data-settings-panel] section [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])',
+      '[data-settings-panel] [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])',
     ],
     alwaysPresent: false,
     description: '设置分组卡片',

@@ -89,9 +89,10 @@ describe('buildBackgroundCss', () => {
     '[data-app-shell-frame]',
     '[data-sidebar-navigation-root]',
     '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-store-page-search)::before',
+    '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-page-search)::before',
   ])('draws the same unblurred window background on %s', (selector) => {
     const css = buildBackgroundCss(view());
-    const rule = css.split('}').find((block) => block.includes(`${selector} {`)) ?? '';
+    const rule = css.split('}').find((block) => block.includes(selector)) ?? '';
     expect(rule).toContain('var(--woodfish-background-image, none)');
     expect(rule).not.toContain('--woodfish-background-image-soft');
     expect(rule).not.toContain('--woodfish-background-luminosity');
@@ -116,7 +117,15 @@ describe('buildBackgroundCss', () => {
   it('paints a small frosted layer and a rounded outline behind grouped settings rows', () => {
     const css = buildBackgroundCss(view());
     const card =
-      '[data-settings-panel] section [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])';
+      '[data-settings-panel] [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])';
+    const fixture = document.createElement('div');
+    fixture.innerHTML = `
+      <div data-settings-panel>
+        <div class="flex flex-col [&>*:not(:last-child)]:after:bg-border">
+          <div class="@container/settings-row"></div>
+        </div>
+      </div>`;
+    expect(fixture.querySelector(card)).not.toBeNull();
     const layer = css.split('}').find((block) => block.includes(`${card}::before {`)) ?? '';
     expect(layer).toContain('backdrop-filter: blur(6px);');
     expect(layer).toContain('box-shadow: inset 0 0 0 1px');

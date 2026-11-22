@@ -7,10 +7,12 @@ module.exports = function glass(ctx) {
   const lib = ctx.lib;
   let reveal = null;
   let acrylic = null;
-  const previewMarker = 'data-woodfish-chat-preview-position';
-  const previewAnchor = '--woodfish-chat-preview-anchor';
-  const previewWrapper = `[popover="hint"][${previewMarker}]`;
+  const previewMarker = 'data-woodfish-preview-position';
+  const previewAnchor = '--woodfish-preview-anchor';
+  const previewPopover = '[popover="hint"], [popover="manual"][role="dialog"]';
+  const previewWrapper = `:is(${previewPopover})[${previewMarker}]`;
   const previewSurface = '[data-anchor-positioning="native"][data-placement="inline-end-start"]';
+  const projectRow = '[data-app-action-sidebar-project-row]';
   const positionedPreviews = new Set();
 
   function clearPreview(wrapper) {
@@ -22,7 +24,18 @@ module.exports = function glass(ctx) {
   function positionPreview(wrapper) {
     const card = wrapper.querySelector(`:scope > ${previewSurface}`);
     const anchor = card?.style.getPropertyValue('position-anchor').trim();
-    if (!anchor?.startsWith('--chat-preview-')) return;
+    if (!anchor) return;
+    if (wrapper.getAttribute('popover') === 'hint') {
+      if (!anchor.startsWith('--chat-preview-')) return;
+    } else {
+      // Native popover anchors are shared with other controls. Check the project row.
+      const anchoredProject =
+        anchor.startsWith('--native-popover-') &&
+        Array.from(document.querySelectorAll(projectRow)).some(
+          (row) => row.parentElement?.style.anchorName === anchor
+        );
+      if (!anchoredProject) return;
+    }
     for (const preview of positionedPreviews) {
       if (!preview.isConnected) clearPreview(preview);
     }
@@ -129,7 +142,7 @@ ${rule(`${previewWrapper} > ${previewSurface}`, ['position: static;', 'margin: 0
     'beforetoggle',
     (event) => {
       const wrapper = event.target;
-      if (!(wrapper instanceof HTMLElement) || !wrapper.matches('[popover="hint"]')) return;
+      if (!(wrapper instanceof HTMLElement) || !wrapper.matches(previewPopover)) return;
       if (event.newState === 'open') positionPreview(wrapper);
       else clearPreview(wrapper);
     },
