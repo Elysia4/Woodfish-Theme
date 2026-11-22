@@ -127,12 +127,15 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     ]),
     rule(
       composerPanels,
-      buildBackgroundCopyDeclarations(background, {
-        base: surface,
-        image: fill,
-        soft: true,
-        tint: composerSurface,
-      })
+      buildBackgroundCopyDeclarations(
+        { ...background, mask: Math.min(background.mask, 0.42) },
+        {
+          base: surface,
+          image: fill,
+          soft: true,
+          tint: composerSurface,
+        }
+      )
     ),
   ].join('\n\n');
   return `@media not (prefers-reduced-transparency: reduce) {\n${css}\n}`;

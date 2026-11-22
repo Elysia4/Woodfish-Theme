@@ -26,7 +26,9 @@ describe('background CSS', () => {
     expect(css).toContain('var(--woodfish-background-image, none)');
     expect(css).toContain('background-size: auto, cover;');
     expect(css).toContain('background-position: center, center;');
-    expect(css).toContain('.light {\n  --woodfish-background-luminosity: rgb(204 204 204 / 10%);');
+    expect(css).toContain(
+      '.light {\n  --woodfish-background-luminosity-color: rgb(204 204 204 / 10%);'
+    );
   });
 
   it('uses a given image and the fill gradient', () => {
@@ -44,7 +46,7 @@ describe('background CSS', () => {
   it('frosts panels with the mask tint, luminosity and an optional backdrop blur', () => {
     const frosted = buildFrostedPanelDeclarations('var(--panel)', params, 10).join('\n');
     expect(frosted).toContain(
-      'background-color: var(--woodfish-background-luminosity) !important;'
+      'background-color: var(--woodfish-background-luminosity-color) !important;'
     );
     expect(frosted).toContain('color-mix(in oklab, var(--panel) 35%, transparent)');
     expect(frosted).toContain('backdrop-filter: blur(10px) saturate(150%) !important;');
@@ -66,7 +68,8 @@ describe('background CSS', () => {
       tint: 'var(--panel)',
     }).join('\n');
     expect(panel).toContain('color-mix(in oklab, var(--panel) 35%, transparent)');
-    expect(panel).toContain('linear-gradient(var(--woodfish-background-luminosity)');
+    expect(panel).toContain('linear-gradient(var(--woodfish-background-luminosity-color)');
+    expect(panel).not.toContain('var(--woodfish-background-luminosity)');
     expect(panel).toContain(
       'var(--woodfish-background-image-soft, var(--woodfish-background-image, none))'
     );

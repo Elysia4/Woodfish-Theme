@@ -80,6 +80,16 @@ describe('buildBackgroundCss', () => {
     expect(css).toContain('var(--woodfish-background-image, none)');
   });
 
+  it.each([
+    [0.65, 42],
+    [0.25, 25],
+  ])('keeps the composer tint subtle with a background mask of %s', (mask, tint) => {
+    const css = buildBackgroundCss(view(CODEX_DEFAULT_BACKGROUND_ID, { enabled: true, mask }));
+    expect(css).toContain(
+      `var(--color-background-composer-surface, var(--color-surface-elevated-secondary)) ${tint}%`
+    );
+  });
+
   it('paints the fill gradient instead of a picture', () => {
     const css = buildBackgroundCss(view(CODEX_GRADIENT_BACKGROUND_ID));
     expect(css).toContain('linear-gradient(180deg, #2990bd, #e2ab5b, #e384be)');

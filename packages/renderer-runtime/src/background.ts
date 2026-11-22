@@ -15,7 +15,8 @@ import { formatCssNumber } from './tokenCss';
 export const BACKGROUND_IMAGE_VARIABLE = '--woodfish-background-image';
 /** A blurred copy of the picture for frosted panels drawn without a live backdrop filter. */
 export const BACKGROUND_SOFT_IMAGE_VARIABLE = '--woodfish-background-image-soft';
-const LUMINOSITY_VARIABLE = '--woodfish-background-luminosity';
+// The effect host publishes --woodfish-background-luminosity as a numeric parameter.
+const LUMINOSITY_COLOR_VARIABLE = '--woodfish-background-luminosity-color';
 
 export interface BackgroundLayerOptions {
   /** The layer, usually a pseudo-element such as `body::before`. */
@@ -58,9 +59,11 @@ export function buildBackgroundLayerCss(
 ): string {
   const image = options.image ?? `var(${BACKGROUND_IMAGE_VARIABLE}, none)`;
   return [
-    rule(':root', [`  ${LUMINOSITY_VARIABLE}: rgb(51 51 51 / ${percent(params.luminosity)});`]),
+    rule(':root', [
+      `  ${LUMINOSITY_COLOR_VARIABLE}: rgb(51 51 51 / ${percent(params.luminosity)});`,
+    ]),
     rule(options.lightScope, [
-      `  ${LUMINOSITY_VARIABLE}: rgb(204 204 204 / ${percent(params.luminosity)});`,
+      `  ${LUMINOSITY_COLOR_VARIABLE}: rgb(204 204 204 / ${percent(params.luminosity)});`,
     ]),
     rule(options.layerSelector, [
       '  content: "";',
@@ -107,7 +110,7 @@ export function buildBackgroundCopyDeclarations(
     const color = `color-mix(in oklab, ${options.tint} ${percent(params.mask)}, transparent)`;
     layers.push(
       `linear-gradient(${color}, ${color})`,
-      `linear-gradient(var(${LUMINOSITY_VARIABLE}), var(${LUMINOSITY_VARIABLE}))`
+      `linear-gradient(var(${LUMINOSITY_COLOR_VARIABLE}), var(${LUMINOSITY_COLOR_VARIABLE}))`
     );
   }
   layers.push(veil(options.base, params), image);
@@ -141,7 +144,7 @@ export function buildFrostedPanelDeclarations(
 ): string[] {
   const color = `color-mix(in oklab, ${tint} ${percent(params.mask)}, transparent)`;
   const declarations = [
-    `  background-color: var(${LUMINOSITY_VARIABLE}) !important;`,
+    `  background-color: var(${LUMINOSITY_COLOR_VARIABLE}) !important;`,
     `  background-image: linear-gradient(${color}, ${color}) !important;`,
   ];
   if (blur !== null && blur > 0) {
