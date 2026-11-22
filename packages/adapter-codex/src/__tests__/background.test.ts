@@ -72,9 +72,11 @@ describe('buildBackgroundCss', () => {
       'background-attachment: fixed !important;'
     );
     expect(css).toContain('mask-image: linear-gradient(to bottom, #000, transparent);');
-    // Live blur is limited to the settings cards, away from streaming replies.
+    // Live blur stays on grouped surfaces, away from streaming replies.
     const blurRules = css.split('}').filter((block) => block.includes('backdrop-filter: blur'));
-    expect(blurRules.every((block) => block.includes('[data-settings-panel]'))).toBe(true);
+    expect(blurRules).toHaveLength(1);
+    expect(blurRules[0]).not.toContain('[data-app-action-timeline-scroll]');
+    expect(blurRules[0]).not.toContain('[data-codex-composer-root]');
     expect(css).toContain('var(--woodfish-background-image, none)');
   });
 
@@ -117,20 +119,75 @@ describe('buildBackgroundCss', () => {
   it('paints a small frosted layer and a rounded outline behind grouped settings rows', () => {
     const css = buildBackgroundCss(view());
     const card =
-      '[data-settings-panel] [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])';
+      '[data-settings-panel] [class*="]:after:bg-border"]:is([class~="[--settings-row-padding-inline:initial]"]:has(> *), :has(> [class~="@container/settings-row"]))';
     const fixture = document.createElement('div');
     fixture.innerHTML = `
       <div data-settings-panel>
-        <div class="flex flex-col [&>*:not(:last-child)]:after:bg-border">
+        <div class="flex flex-col [&>*:not(:last-child)]:after:bg-border [--settings-row-padding-inline:initial]">
           <div class="@container/settings-row"></div>
         </div>
       </div>`;
     expect(fixture.querySelector(card)).not.toBeNull();
-    const layer = css.split('}').find((block) => block.includes(`${card}::before {`)) ?? '';
+    const layer = css.split('}').find((block) => block.includes(`${card}::before`)) ?? '';
     expect(layer).toContain('backdrop-filter: blur(6px);');
     expect(layer).toContain('box-shadow: inset 0 0 0 1px');
     expect(layer).toContain('border-radius: inherit;');
     expect(layer).toContain('pointer-events: none;');
+  });
+
+  it('shares one decorative layer across settings, catalog and project groups', () => {
+    const root = document.createElement('div');
+    root.innerHTML = `
+      <div data-settings-panel>
+        <div id="settings" class="[&>*:not(:last-child)]:after:bg-border [--settings-row-padding-inline:initial]">
+          <div id="setting-row"></div>
+        </div>
+        <div id="settings-legacy" class="[&>*:not(:last-child)]:after:bg-border">
+          <div class="@container/settings-row"></div>
+        </div>
+        <section><div id="permissions"><table data-page-size></table></div></section>
+        <fieldset><section><div id="pets" class="grid"><div class="rounded-2xl bg-surface text-center"></div></div></section></fieldset>
+      </div>
+      <main data-app-shell-main-surface>
+        <input id="plugins-store-page-search">
+        <section id="plugins-communication">
+          <div id="category-heading" data-slot="section-header">Communication</div>
+          <div><div id="category" class="grid @min-[581px]/skills-grid:grid-cols-2"><button id="plugin-row"></button></div></div>
+        </section>
+        <div id="plugin-search" class="grid @min-[581px]/skills-grid:grid-cols-2"><button></button></div>
+      </main>
+      <main data-app-shell-main-surface>
+        <input id="plugins-page-search">
+        <section id="skills-installed">
+          <div data-slot="section-header">Installed</div>
+          <div id="installed" class="grid @min-[581px]/skills-grid:grid-cols-2"><button></button></div>
+        </section>
+        <div id="skill-tab" class="grid @min-[581px]/skills-grid:grid-cols-2"><button></button></div>
+        <div id="empty-grid" class="grid @min-[581px]/skills-grid:grid-cols-2"></div>
+      </main>
+      <main data-app-shell-main-surface>
+        <div class="grid @min-[581px]/skills-grid:grid-cols-2" id="unrelated-grid"><button></button></div>
+        <div id="projects">
+          <div data-projects-header></div>
+          <div data-projects-rows><div id="project-row" data-project-row-wrapper></div></div>
+        </div>
+      </main>`;
+    const css = buildBackgroundCss(view());
+    const decorations = css.match(/([^{}]+)\{[^{}]*backdrop-filter: blur\(6px\);[^{}]*\}/g) ?? [];
+    expect(decorations).toHaveLength(1);
+    const layer = decorations[0] ?? '';
+    const selectors = layer.slice(0, layer.indexOf('{')).replace(/::before/g, '');
+    expect([...root.querySelectorAll(selectors)].map((element) => element.id)).toEqual([
+      'settings',
+      'settings-legacy',
+      'permissions',
+      'pets',
+      'category',
+      'plugin-search',
+      'installed',
+      'skill-tab',
+      'projects',
+    ]);
   });
 
   it.each(['default', 'opaque'])(

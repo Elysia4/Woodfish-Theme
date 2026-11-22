@@ -164,12 +164,35 @@ export const CODEX_SELECTORS = {
     description: '设置内容',
   },
   settingsCard: {
-    // The native stacked group draws its intra-row dividers with this Tailwind utility.
+    // Match the native stack, including custom rows that omit @container/settings-row.
     selectors: [
-      '[data-settings-panel] [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])',
+      '[data-settings-panel] [class*="]:after:bg-border"]:is([class~="[--settings-row-padding-inline:initial]"]:has(> *), :has(> [class~="@container/settings-row"]))',
+      '[data-settings-panel] section div:has(> table[data-page-size])',
     ],
     alwaysPresent: false,
     description: '设置分组卡片',
+  },
+  settingsGallery: {
+    selectors: [
+      '[data-settings-panel] fieldset section .grid:has(> .rounded-2xl.bg-surface.text-center)',
+    ],
+    alwaysPresent: false,
+    description: '设置中的智能伙伴预览组',
+  },
+  catalogGroup: {
+    // Both catalogs use the same responsive item grid, including unheaded search results.
+    selectors: [
+      '[data-app-shell-main-surface]:has(#plugins-store-page-search, #plugins-page-search) .grid[class*="/skills-grid:grid-cols-2"]:has(> *)',
+    ],
+    alwaysPresent: false,
+    description: '插件分类和技能列表',
+  },
+  projectListCard: {
+    selectors: [
+      '[data-app-shell-main-surface] :has(> [data-projects-header]):has(> [data-projects-rows] > [data-project-row-wrapper])',
+    ],
+    alwaysPresent: false,
+    description: '项目列表',
   },
   threadFooter: {
     selectors: ['[data-thread-scroll-footer] > .bg-surface.pointer-events-none'],

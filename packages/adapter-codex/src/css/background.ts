@@ -41,10 +41,13 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     .map((selector) => `${selector}::before`)
     .join(',\n');
   const settingsPanel = selectorOf('settingsPanel');
-  const settingsCard = selectorOf('settingsCard');
-  const settingsCardBackdrop = CODEX_SELECTORS.settingsCard.selectors
-    .map((selector) => `${selector}::before`)
-    .join(',\n');
+  const paddedCards = [
+    ...CODEX_SELECTORS.settingsCard.selectors,
+    ...CODEX_SELECTORS.settingsGallery.selectors,
+    ...CODEX_SELECTORS.catalogGroup.selectors,
+  ];
+  const groupCards = [...paddedCards, ...CODEX_SELECTORS.projectListCard.selectors];
+  const groupCardBackdrops = groupCards.map((selector) => `${selector}::before`).join(',\n');
   const footerFade = `${selectorOf('timeline')} .from-surface.pointer-events-none`;
   const footer = selectorOf('threadFooter');
   // Current Codex paints the lower fade and inset on the footer parent's pseudo-elements.
@@ -78,14 +81,17 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
       '  --color-border: color-mix(in oklab, var(--color-text) 9%, transparent);',
       '  --color-border-subtle: color-mix(in oklab, var(--color-text) 6%, transparent);',
     ]),
-    rule(settingsCard, [
+    rule(paddedCards.join(',\n'), ['  padding-inline: 12px;']),
+    rule(`${selectorOf('catalogGroup')},\n${selectorOf('settingsGallery')}`, [
+      '  padding-block: 8px;',
+    ]),
+    rule(groupCards.join(',\n'), [
       '  position: relative;',
       '  isolation: isolate;',
-      '  padding-inline: 12px;',
       '  border-radius: 14px;',
     ]),
     // Isolate the blur on a decorative layer so controls keep their positioning and hit areas.
-    rule(settingsCardBackdrop, [
+    rule(groupCardBackdrops, [
       '  content: "";',
       '  position: absolute;',
       '  inset: 0;',
@@ -96,6 +102,8 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
       '  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-text) 12%, transparent);',
       '  backdrop-filter: blur(6px);',
     ]),
+    // The pet tiles already have a border and selection ring. Let the group tint show through.
+    rule(`${selectorOf('settingsGallery')} > .bg-surface`, ['  background-color: transparent;']),
     rule(
       `${topFade},\n${footerFade},\n${footer},\n${footerContainer}::before,\n${footerContainer}::after`,
       windowBackground
