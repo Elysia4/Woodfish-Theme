@@ -64,7 +64,7 @@ describe('buildBackgroundCss', () => {
     expect(css).toContain('body::before {');
     expect(css).toContain('--woodfish-codex-surface: var(--color-surface);');
     expect(css).toContain(
-      'main.bg-surface,\n[data-app-shell-main-surface],\n[data-codex-history-swipe-page] > .electron\\:bg-surface {\n  background-color: transparent !important;'
+      'main.bg-surface,\n[data-app-shell-main-surface],\n[data-codex-history-swipe-page] > .electron\\:bg-surface,'
     );
     expect(css).toContain('--composer-layout-surface-backdrop-filter: none !important;');
     const footer = css.slice(css.indexOf('[data-thread-scroll-footer]'));
@@ -74,9 +74,9 @@ describe('buildBackgroundCss', () => {
     expect(css).toContain('mask-image: linear-gradient(to bottom, #000, transparent);');
     // Live blur stays on grouped surfaces, away from streaming replies.
     const blurRules = css.split('}').filter((block) => block.includes('backdrop-filter: blur'));
-    expect(blurRules).toHaveLength(1);
-    expect(blurRules[0]).not.toContain('[data-app-action-timeline-scroll]');
-    expect(blurRules[0]).not.toContain('[data-codex-composer-root]');
+    expect(blurRules).toHaveLength(2);
+    expect(blurRules.join('')).not.toContain('[data-app-action-timeline-scroll]');
+    expect(blurRules.join('')).not.toContain('[data-codex-composer-root]');
     expect(css).toContain('var(--woodfish-background-image, none)');
   });
 
@@ -92,6 +92,7 @@ describe('buildBackgroundCss', () => {
     '[data-sidebar-navigation-root]',
     '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-store-page-search)::before',
     '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-page-search)::before',
+    '[data-app-shell-inline-page-header] [data-sticky]:has(#projects-index-search)::before',
   ])('draws the same unblurred window background on %s', (selector) => {
     const css = buildBackgroundCss(view());
     const rule = css.split('}').find((block) => block.includes(selector)) ?? '';
@@ -99,6 +100,33 @@ describe('buildBackgroundCss', () => {
     expect(rule).not.toContain('--woodfish-background-image-soft');
     expect(rule).not.toContain('--woodfish-background-luminosity');
     expect(rule).toContain('background-attachment: fixed !important;');
+  });
+
+  it('clears only the project page backing and gives its list a lighter blur', () => {
+    const css = buildBackgroundCss(view());
+    const root = document.createElement('div');
+    root.innerHTML = `
+      <div data-app-shell-focus-area>
+        <div id="projects-backing" class="bg-surface">
+          <div class="contents">
+            <div data-app-shell-inline-page-header>
+              <div data-sticky><input id="projects-index-search"></div>
+              <div id="project-item" class="bg-surface"></div>
+            </div>
+          </div>
+        </div>
+        <div id="unrelated-backing" class="bg-surface"></div>
+      </div>`;
+    const clear =
+      css.match(/([^{}]+)\{\s*background-color: transparent !important;\s*\}/)?.[1] ?? '';
+    expect([...root.querySelectorAll(clear)].map((element) => element.id)).toEqual([
+      'projects-backing',
+    ]);
+    const projectBlur = css
+      .split('}')
+      .find((block) => block.includes('backdrop-filter: blur(3px);'));
+    expect(projectBlur).toContain('[data-projects-rows]');
+    expect(projectBlur).not.toContain('[data-settings-panel]');
   });
 
   it('uses the wallpaper for the current thread top fade while keeping its mask', () => {

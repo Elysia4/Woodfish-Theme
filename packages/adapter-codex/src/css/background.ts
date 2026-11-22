@@ -37,7 +37,10 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
     image: fill,
   });
   const topFade = selectorOf('mainTopFade');
-  const pluginPageHeaderBackdrop = CODEX_SELECTORS.pluginPageHeader.selectors
+  const inlinePageHeaderBackdrop = [
+    ...CODEX_SELECTORS.pluginPageHeader.selectors,
+    ...CODEX_SELECTORS.projectPageHeader.selectors,
+  ]
     .map((selector) => `${selector}::before`)
     .join(',\n');
   const settingsPanel = selectorOf('settingsPanel');
@@ -48,6 +51,9 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
   ];
   const groupCards = [...paddedCards, ...CODEX_SELECTORS.projectListCard.selectors];
   const groupCardBackdrops = groupCards.map((selector) => `${selector}::before`).join(',\n');
+  const projectCardBackdrops = CODEX_SELECTORS.projectListCard.selectors
+    .map((selector) => `${selector}::before`)
+    .join(',\n');
   const footerFade = `${selectorOf('timeline')} .from-surface.pointer-events-none`;
   const footer = selectorOf('threadFooter');
   // Current Codex paints the lower fade and inset on the footer parent's pseudo-elements.
@@ -69,14 +75,15 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
       image: fill,
     }),
     // The thread, the window frame and pages like Settings (Tailwind `electron:bg-surface`).
-    rule(`main.bg-surface,\n${selectorOf('appShell')},\n${selectorOf('page')}`, [
-      '  background-color: transparent !important;',
-    ]),
+    rule(
+      `main.bg-surface,\n${selectorOf('appShell')},\n${selectorOf('page')},\n${selectorOf('projectPageBacking')}`,
+      ['  background-color: transparent !important;']
+    ),
     rule(selectorOf('appShellFrame'), windowBackground),
     // Newer Codex draws a separate backing behind the transparent main surface.
     rule(selectorOf('appShellSurfaceBacking'), windowBackground),
     rule(selectorOf('sidebar'), windowBackground),
-    rule(pluginPageHeaderBackdrop, windowBackground),
+    rule(inlinePageHeaderBackdrop, windowBackground),
     rule(settingsPanel, [
       '  --color-border: color-mix(in oklab, var(--color-text) 9%, transparent);',
       '  --color-border-subtle: color-mix(in oklab, var(--color-text) 6%, transparent);',
@@ -102,6 +109,7 @@ export function buildBackgroundCss(settings: CodexCoreView): string {
       '  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-text) 12%, transparent);',
       '  backdrop-filter: blur(6px);',
     ]),
+    rule(projectCardBackdrops, ['  backdrop-filter: blur(3px);']),
     // The pet tiles already have a border and selection ring. Let the group tint show through.
     rule(`${selectorOf('settingsGallery')} > .bg-surface`, ['  background-color: transparent;']),
     rule(

@@ -156,7 +156,19 @@ export const CODEX_SELECTORS = {
       '[data-app-shell-inline-page-header] [data-sticky]:has(#plugins-page-search)',
     ],
     alwaysPresent: false,
-    description: '插件页标题底板',
+    description: '插件和技能页的标题底板',
+  },
+  projectPageHeader: {
+    selectors: ['[data-app-shell-inline-page-header] [data-sticky]:has(#projects-index-search)'],
+    alwaysPresent: false,
+    description: '项目页标题底板',
+  },
+  projectPageBacking: {
+    selectors: [
+      '[data-app-shell-focus-area] .bg-surface:has(> .contents > [data-app-shell-inline-page-header] #projects-index-search)',
+    ],
+    alwaysPresent: false,
+    description: '项目页内容底板',
   },
   settingsPanel: {
     selectors: ['[data-settings-panel]'],
