@@ -116,7 +116,7 @@ describe('buildBackgroundCss', () => {
   it('paints a small frosted layer and a rounded outline behind grouped settings rows', () => {
     const css = buildBackgroundCss(view());
     const card =
-      '[data-settings-panel] section > [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])';
+      '[data-settings-panel] section [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])';
     const layer = css.split('}').find((block) => block.includes(`${card}::before {`)) ?? '';
     expect(layer).toContain('backdrop-filter: blur(6px);');
     expect(layer).toContain('box-shadow: inset 0 0 0 1px');

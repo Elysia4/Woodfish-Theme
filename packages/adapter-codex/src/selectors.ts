@@ -165,7 +165,7 @@ export const CODEX_SELECTORS = {
   settingsCard: {
     // The native stacked group draws its intra-row dividers with this Tailwind utility.
     selectors: [
-      '[data-settings-panel] section > [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])',
+      '[data-settings-panel] section [class*="]:after:bg-border"]:has(> [class~="@container/settings-row"])',
     ],
     alwaysPresent: false,
     description: '设置分组卡片',

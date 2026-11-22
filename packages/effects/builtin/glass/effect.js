@@ -7,6 +7,29 @@ module.exports = function glass(ctx) {
   const lib = ctx.lib;
   let reveal = null;
   let acrylic = null;
+  const previewMarker = 'data-woodfish-chat-preview-position';
+  const previewAnchor = '--woodfish-chat-preview-anchor';
+  const previewWrapper = `[popover="hint"][${previewMarker}]`;
+  const previewSurface = '[data-anchor-positioning="native"][data-placement="inline-end-start"]';
+  const positionedPreviews = new Set();
+
+  function clearPreview(wrapper) {
+    if (!positionedPreviews.delete(wrapper)) return;
+    wrapper.removeAttribute(previewMarker);
+    wrapper.style.removeProperty(previewAnchor);
+  }
+
+  function positionPreview(wrapper) {
+    const card = wrapper.querySelector(`:scope > ${previewSurface}`);
+    const anchor = card?.style.getPropertyValue('position-anchor').trim();
+    if (!anchor?.startsWith('--chat-preview-')) return;
+    for (const preview of positionedPreviews) {
+      if (!preview.isConnected) clearPreview(preview);
+    }
+    wrapper.style.setProperty(previewAnchor, anchor);
+    wrapper.setAttribute(previewMarker, '');
+    positionedPreviews.add(wrapper);
+  }
 
   function rule(selector, lines) {
     return `${selector} {\n${lines.map((line) => `  ${line}`).join('\n')}\n}`;
@@ -31,6 +54,19 @@ module.exports = function glass(ctx) {
     if (p.noise > 0) glassLines.push(`background-image: ${lib.noiseDataUri(p.noise)} !important;`);
     if (p.borderRadius > 0) glassLines.push(`border-radius: ${p.borderRadius}px !important;`);
     const parts = [
+      `@supports (position-area: inline-end span-block-end) {
+${rule(previewWrapper, [
+  `position-anchor: var(${previewAnchor});`,
+  'position-area: inline-end span-block-end;',
+  'position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;',
+  'inset: auto;',
+  'margin: 0;',
+  'margin-inline-start: 2px;',
+  'inline-size: max-content;',
+  'block-size: max-content;',
+])}
+${rule(`${previewWrapper} > ${previewSurface}`, ['position: static;', 'margin: 0;'])}
+}`,
       `@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {\n${rule(targets, glassLines)}\n}`,
       `@media (prefers-reduced-transparency: reduce) {\n${rule(targets, ['backdrop-filter: none !important;', '-webkit-backdrop-filter: none !important;', 'background-image: none !important;'])}\n}`,
       // Section headers in the composer menu are opaque strips; let the glass through.
@@ -87,11 +123,24 @@ module.exports = function glass(ctx) {
   }
 
   apply();
+  // beforetoggle is dispatched on the popover itself, including reused wrappers.
+  ctx.on(
+    document,
+    'beforetoggle',
+    (event) => {
+      const wrapper = event.target;
+      if (!(wrapper instanceof HTMLElement) || !wrapper.matches('[popover="hint"]')) return;
+      if (event.newState === 'open') positionPreview(wrapper);
+      else clearPreview(wrapper);
+    },
+    true
+  );
   return {
     update: apply,
     dispose() {
       if (reveal) reveal();
       if (acrylic) acrylic.dispose();
+      for (const wrapper of positionedPreviews) clearPreview(wrapper);
     },
   };
 };
